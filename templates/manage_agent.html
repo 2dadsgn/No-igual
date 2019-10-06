@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block body %}
+    <div class="container-fluid">
+        <nav>
+            <a>
+                <li class="menuli" id="clienti">Clienti</li>
+                <li class="menuli" id="ordini">Ordini</li>
+                <li class="menuli" id="espositore">Espositore</li>
+                <li class="menuli" id="account">Account</li>
+                </ol>
+                <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
+                     width="130" height="106" alt=""/>
+                <div class="menu-scomparsa" id="menu-scomp">
+                    <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
+                                          width="216" height="212" alt=""/></div>
+                    <div class="row">
+                        <ol class="ol-scomparsa">
+                            <li>Log Out</li>
+                        </ol>
+                    </div>
+                </div>
+                <div id="exit"></div>
+        </nav>
+        <!--SEZIONE ESPOSITORE-->
+        <div class="row" id="sezione-espositore">
+            <div class="col-md-3" style="text-align: center;align-content: center">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+            <div class="col-md-3">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+            <div class="col-md-3">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+        </div>
+        <!--FINE SEZXIONE ESPOSITORE-->
+
+        <!--SEZIONE ORDINI-->
+        <div id="sezione-ordini">
+            <div class="row">
+                <div class="col-5"></div>
+                <div class="col-2" style="align-content:center">
+
+                    <button id="crea-ordine">Crea nuovo ordine</button>
+                </div>
+                <div class="col-5"></div>
+            </div>
+            <div class="row">
+                {% for i in ordini %}
+                    {% if i== none %}
+                        <div style="height: 100px;width: 100px" class="box-gray-ordini"><p>Empty</p></div>
+                    {% else %}
+                        <div class="col-md-8 box-gray-ordini">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="row">
+                                        <h4 class="col-6">Ordine numero:</h4>
+                                        <p class="col-6">{{ i[0] }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <h4 class="col-6">Nome Cliente:</h4>
+                                        <p class="col-6">{{ i[1] }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <h4 class="col-6">Cognome Cliente:</h4>
+                                        <p class="col-6">{{ i[2] }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <h4 class="col-6">Data:</h4>
+                                        <p class="col-6">{{ i[3] }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="row">
+                                        <h4 class="col-6">Codici articoli:</h4>
+                                        <p class="col-6"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="controls">
+                                    <img id="modify" src="{{ url_for('static',filename='modify.png') }}">
+                                    <img id="delete" src="{{ url_for('static',filename='delete.png') }}">
+                                </div>
+                                <input class="hidden" type="text" name="ordine_numero" value="{{ i[0] }}">
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <!--FINE SEZIONE ORDINI-->
+
+        <!--SEZIONE CREAZIONE ORDINE-->
+        <form id="sezione-crea-ordine" method="post" action="{{ url_for('adding_orders') }}">
+            <div class="col-md-8 box-gray-ordini-crea">
+                <div class="row">
+                    <div class="col-4">
+                        <h4 class="col-6">Ordine numero:</h4>
+                        <input type="text" name="ordine_numero" class="col-6">
+                        <h4 class="col-6">Nome Cliente:</h4>
+                        <input type="text" name="nome_cliente" class="col-6">
+                        <h4 class="col-6">cognome Cliente:</h4>
+                        <input type="text" name="cognome_cliente" class="col-6">
+                        <h4 class="col-6">Data:</h4>
+                        <input type="date" name="data" class="col-6">
+                    </div>
+                    <div class="col-4">
+                        <h4 class="col-6">Ordine numero:</h4>
+                        <input type="text" name="ordine_numero" class="col-6">
+                        <h4 class="col-6">Nome Cliente:</h4>
+                        <input type="text" name="nome_cliente" class="col-6">
+                        <h4 class="col-6">cognome Cliente:</h4>
+                        <input type="text" name="cognome_cliente" class="col-6">
+                        <h4 class="col-6">Data:</h4>
+                        <input type="date" name="data" class="col-6">
+                    </div>
+                    <div class="col-4">
+                        <h4 class="col-6">Codici articoli:</h4>
+                        <p class="col-6">prova</p>
+                        <p class="col-6"></p>
+                        <p class="col-6">prova</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row div-tasti">
+                <button class="tasto-canc" id="indietro-ordine"> indietro</button>
+                <button class="tasto-ins" type="submit">crea</button>
+            </div>
+        </form>
+        <!--FINE SEZIONE CREAZIONE ORDINE-->
+
+        <!--SEZIONE ACCOUNT-->
+        <div class="row" id="sezione-account">
+            <div class="col-md-8 box-gray-account">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4"></div>
+                    <div class="col-4"></div>
+                </div>
+            </div>
+        </div>
+        <!--FINE SEZIONE ACCOUNT-->
+
+        <!--SEZIONE CLIENTI-->
+        <div id="sezione-clienti">
+            <div class="row">
+                <div class="col-5"></div>
+                <div class="col-2" style="align-content:center">
+                    <button id="agg-cliente">Aggiungi nuovo cliente</button>
+                </div>
+                <div class="col-5"></div>
+            </div>
+            <form class="col-md-10 box-gray-clienti">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 class="col-6">Nome e cognome</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">ordine num</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">data</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">ragione sociale</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">via</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">cap</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">città</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">provincia</h4>
+                        <p class="col-6"></p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="col-6">Partita Iva</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">codice fiscale</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">codice SDI</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">Email</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">Telefono</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">Banca</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">Iban</h4>
+                        <p class="col-6"></p>
+                        <h4 class="col-6">tipo pagamento</h4>
+                        <p class="col-6"></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!--FINE SEZIONE CLIENTI-->
+
+        <!--SEZIONE aggiunta cliente-->
+        <div id="sezione-add-clienti">
+            <form class="col-md-10 box-gray-clienti-add">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 class="col-6">Nome e cognome</h4>
+                        <input name="nome e cognome" type="text">
+                        <h4 class="col-6">ordine num</h4>
+                        <input name="ordine numero" type="text">
+                        <h4 class="col-6">data</h4>
+                        <input name="data" type="text">
+                        <h4 class="col-6">ragione sociale</h4>
+                        <input name="ragione sociale" type="text">
+                        <h4 class="col-6">via</h4>
+                        <input name="via" type="text">
+                        <h4 class="col-6">cap</h4>
+                        <input name="cap" type="text">
+                        <h4 class="col-6">città</h4>
+                        <input name="città" type="text">
+                        <h4 class="col-6">provincia</h4>
+                        <input name="provincia" type="text">
+                    </div>
+                    <div class="col-6">
+                        <h4 class="col-6">Partita Iva</h4>
+                        <input name="partita iva" type="text">
+                        <h4 class="col-6">codice fiscale</h4>
+                        <input name="codice fiscale" type="text">
+                        <h4 class="col-6">codice SDI</h4>
+                        <input name="codice sdi" type="text">
+                        <h4 class="col-6">Email</h4>
+                        <input name="email" type="text">
+                        <h4 class="col-6">Telefono</h4>
+                        <input name="telefono" type="text">
+                        <h4 class="col-6">Banca</h4>
+                        <input name="banca" type="text">
+                        <h4 class="col-6">Iban</h4>
+                        <input name="iban" type="text">
+                        <h4 class="col-6">tipo pagamento</h4>
+                        <input name="tipo pagamento" type="text">
+                    </div>
+                </div>
+            </form>
+            <div class="row div-tasti">
+                <button class="tasto-canc" id="indietro-cliente"> indietro</button>
+                <input type="submit" value="Inserisci">
+            </div>
+        </div>
+        <!--FINE SEZIONE aggiunta CLIENTI-->
+
+    </div>
+{% endblock %}

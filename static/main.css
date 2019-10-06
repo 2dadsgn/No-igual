@@ -1,0 +1,486 @@
+@charset "UTF-8";
+/* CSS Document */
+body {
+    padding: 10em 0 0 0;
+    font-size: 15px;
+}
+
+.errore {
+    font-size: 15px;
+    color: red;
+}
+
+#login {
+    width: 20em;
+    height: 20em;
+    text-align: center;
+    align-content: center;
+    margin: auto;
+    background-color: none;
+    margin-top: 20vh;
+    color: hsla(0, 0%, 47%, 1.00);
+}
+
+.input-form {
+    width: 5em;
+    border-radius: 20px;
+    margin: auto;
+    margin-bottom: 2em;
+    color: black;
+    border-color: lightgray;
+    font-family: 'Roboto', sans-serif;
+}
+
+.login-tasto {
+    font-size: 0.9em;
+    text-transform: uppercase;
+    background-color: whitesmoke;
+    color: gray;
+    border-radius: 20px;
+    margin: auto;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+}
+
+/*-----------paragraph and header------------------*/
+h1 {
+    font-size: 1em;
+    font-family: 'Roboto', sans-serif;
+}
+
+h2 {
+    font-size: 1.5em;
+    font-family: 'EB Garamond', serif;
+    font-weight: 100;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+h3 {
+    font-size: 3em;
+    font-family: 'EB Garamond', serif;
+    font-weight: 100;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+h4 {
+    font-size: 1.2em;
+    font-family: 'Oxygen', serif;
+    font-weight: 100;
+    letter-spacing: 0.05em;
+    text-align: left;
+    margin-bottom: 0.5em;
+}
+
+input {
+    margin-bottom: 1.4em;
+}
+
+.titolo {
+    font-size: 3em;
+    color: black;
+    margin-bottom: 1em;
+    letter-spacing: 0.1em;
+    font-family: 'Playfair Display', serif;
+}
+
+/*--------------------------------------------------*/
+/*----------------------MENU-----------------------*/
+a:link, a:visited, a:hover, a, a:link:active, a:visited:active {
+    color: black;
+    text-decoration: none;
+    cursor: default;
+    background-color: none;
+}
+
+nav {
+    position: fixed;
+    top: 1em;
+    z-index: 20;
+}
+
+ol {
+    display: inline;
+    float: left;
+    list-style-type: none;
+    margin: auto;
+}
+
+li {
+    width: 200px;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.3em;
+    font-weight: 300;
+    display: inline;
+    margin-left: 10vw;
+    border-radius: 20px;
+    transition-property: background;
+    transition-duration: 700ms;
+    transition-timing-function: ease-in-out;
+    cursor: pointer;
+}
+
+.img-menu {
+    width: 30px;
+    height: 30px;
+    position: fixed;
+    left: 90vw;
+    display: block;
+}
+
+.img-menu:hover {
+    transform: rotate(360deg);
+    transition-property: all;
+    transition-duration: 700ms;
+    transition-timing-function: ease-in-out;
+}
+
+.menu-scomparsa {
+    position: fixed;
+    top: 0em;
+    right: -55vw;
+    width: 55vw;
+    height: 100vh;
+    background-color: hsla(0, 0%, 0%, 0.83);
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 1000ms;
+    z-index: 100;
+    color: white;
+    align-content: center;
+    float: none;
+}
+
+#img-close {
+    width: 40px;
+    height: 40px;
+    margin: 1em auto;
+}
+
+.ol-scomparsa {
+    align-content: center;
+    text-align: center;
+    margin: auto;
+    z-index: 100;
+}
+
+#exit {
+    width: 75vw;
+    height: 100%;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+/*mobile*/
+@media (max-width: 576px) {
+    nav {
+        display: none;
+    }
+}
+
+/*tablet*/
+@media (max-width: 1280px) {
+}
+
+/*laptop*/
+@media (max-width: 1800px) {
+}
+
+/*--------------------------------------------------*/
+/*-----------------------ESPOSITORE------------------*/
+#sezione-espositore {
+    position: fixed;
+    top: 10em;
+    left: 0em;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: -1;
+    padding: 2em;
+}
+
+.img-ogg {
+    width: 15em;
+    height: 15em;
+    margin: 0 5vw 0 5vw;
+    padding: 0;
+    z-index: inherit;
+}
+
+/*mobile*/
+@media (max-width: 576px) {
+}
+
+/*tablet*/
+@media (max-width: 1280px) {
+}
+
+/*laptop*/
+@media (max-width: 1800px) {
+}
+
+/*--------------------------------------------------*/
+/*-----------------------ACCOUNT------------------*/
+#sezione-account {
+    position: fixed;
+    top: 10em;
+    left: -100em;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: 2;
+}
+
+.box-gray-account {
+    background-color: hsla(0, 0%, 38%, 0.20);
+    width: 80vw;
+    height: 30em;
+    margin: auto;
+    border-radius: 10px;
+    color: black;
+    padding: 2em;
+    font-family: 'Oxygen', sans-serif;
+    z-index: 2;
+}
+
+.box-gray-account input {
+    margin-top: 0.5em;
+    z-index: 2;
+
+}
+
+.box-gray-account button {
+    margin-top: -2em;
+    z-index: 2;
+
+}
+
+/*mobile*/
+@media (max-width: 576px) {
+    #sezione-account {
+        display: none;
+    }
+}
+
+/*tablet*/
+@media (max-width: 1280px) {
+}
+
+/*laptop*/
+@media (max-width: 1800px) {
+}
+
+/*--------------------------------------------------*/
+/*-----------------------CLIENTI------------------*/
+.box-gray-clienti .row {
+    margin-bottom: 1em;
+    z-index: 2;
+}
+
+#sezione-clienti {
+    position: fixed;
+    top: 10em;
+    left: -100em;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: 2;
+}
+
+#sezione-add-clienti {
+    position: fixed;
+    top: 10em;
+    left: -100em;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: 2;
+
+}
+
+.box-gray-clienti {
+    background-color: hsla(0, 0%, 38%, 0.20);
+    width: 95vw;
+    height: 25em;
+    margin: auto;
+    border-radius: 10px;
+    color: black;
+    font-family: 'Oxygen', sans-serif;
+    padding: 2em 0 0 2em;
+    text-align: left;
+    z-index: 2;
+}
+
+.box-gray-clienti-add {
+    background-color: hsla(0, 0%, 38%, 0.20);
+    width: 95vw;
+    height: 50em;
+    margin: auto;
+    border-radius: 10px;
+    color: black;
+    font-family: 'Oxygen', sans-serif;
+    padding: 2em 0 0 2em;
+    text-align: left;
+    z-index: 2;
+}
+
+.back {
+    margin: 0 0 3em 21em;
+    z-index: 2;
+}
+
+.div-tasti {
+    margin: 1em 0 0 40vw;
+    z-index: 2;
+}
+
+.tasto-ins {
+    margin-right: 3em;
+    background-color: hsla(117, 61%, 47%, 0.35);
+    z-index: 2;
+}
+
+.tasto-canc {
+    margin-right: 3em;
+    z-index: 2;
+}
+
+#agg-cliente {
+    margin-bottom: 2em;
+    z-index: 2;
+}
+
+/*mobile*/
+@media (max-width: 576px) {
+}
+
+/*tablet*/
+@media (max-width: 1280px) {
+    .box-gray-clienti {
+        background-color: hsla(0, 0%, 38%, 0.20);
+        width: 95vw;
+        height: 35em;
+        margin: auto;
+        border-radius: 10px;
+        color: black;
+        font-family: 'Oxygen', sans-serif;
+        padding: 4em 0 0 0.5em;
+        text-align: left;
+        z-index: 2;
+    }
+}
+
+/*laptop*/
+@media (max-width: 1800px) {
+}
+
+/*--------------------------------------------------*/
+/*-----------------------ORDINI------------------*/
+#sezione-ordini {
+    position: relative;
+    top: 0em;
+    left: -100em;
+    z-index: 2;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: 2;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#sezione-crea-ordine {
+    position: fixed;
+    top: 10em;
+    left: -100em;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    transition-duration: 800ms;
+    z-index: 2;
+}
+
+#crea-ordine {
+    margin-bottom: 2em;
+    z-index: 2;
+}
+
+.box-gray-ordini {
+    background-color: hsla(0, 0%, 38%, 0.20);
+    width: 80vw;
+    height: 15em;
+    margin: auto;
+    border-radius: 10px;
+    color: black;
+    font-family: 'Oxygen', sans-serif;
+    z-index: 2;
+    margin-bottom: 1.5em;
+}
+
+.box-gray-ordini-crea {
+    background-color: hsla(0, 0%, 38%, 0.20);
+    width: 80vw;
+    height: 100%;
+    margin: auto;
+    border-radius: 10px;
+    color: black;
+    font-family: 'Oxygen', sans-serif;
+    z-index: 2;
+}
+
+.add {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 2em;
+    z-index: 2;
+}
+
+.controls {
+    position: absolute;
+    right: 50px;
+    top: 50px;
+}
+
+.controls img {
+    width: 30px;
+    height: 30px;
+    position: relative;
+    float: left;
+    margin: 0.5em;
+}
+
+#modify {
+    position: absolute;
+    top: 0;
+}
+
+#delete {
+    position: absolute;
+    top: 70px;
+}
+
+.hidden {
+    display: none;
+}
+
+/*mobile*/
+@media (max-width: 576px) {
+}
+
+/*tablet*/
+@media (max-width: 1280px) {
+}
+
+/*laptop*/
+@media (max-width: 1800px) {
+}
+
+/*--------------------------------------------------*/
+/*-----------------------IPAD VIEW--------------------*/
+@media only screen and (min-device-width: 768px) and (max-device-width: 1280px) and (orientation: portrait) {
+}
+
+/*--------------------------------------------------*/

@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% block body %}
+    <div class="container-fluid">
+        <nav>
+            <ol>
+                <li class="menuli" id="clienti">Clienti</li>
+                <li class="menuli" id="ordini">Ordini</li>
+                <li class="menuli" id="espositore">Espositore</li>
+                <li class="menuli" id="account">Account</li>
+            </ol>
+            <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}" width="130"
+                 height="106" alt=""/>
+            <div class="menu-scomparsa" id="menu-scomp">
+                <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}" width="216"
+                                      height="212" alt=""/></div>
+                <div class="row">
+                    <ol class="ol-scomparsa">
+                        <li>Log Out</li>
+                    </ol>
+                </div>
+            </div>
+            <div id="exit"></div>
+        </nav>
+
+        {% if utente=="admin" %}
+            <img style="position:fixed; top: 1vh;left: 1vw;"
+                 src="{{ url_for('static',filename='iconfinder_flash-cloud_2995010.png') }}" height="35px" width="40px">
+        {% endif %}
+        <!--SEZIONE ESPOSITORE-->
+        <div class="row" id="sezione-espositore">
+            <button>modifica</button>
+            <div class="col-md-3" style="text-align: center;align-content: center">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+            <div class="col-md-3">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+            <div class="col-md-3">
+                <h2>Lorem Ipsum</h2>
+                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
+                     alt=""/></div>
+            <div class="col-1"></div>
+        </div>
+        <!--FINE SEZXIONE ESPOSITORE-->
+
+        <!--SEZIONE ORDINI-->
+        <div id="sezione-ordini">
+            <div class="row">
+                <div class="col-5"></div>
+                <div class="col-2" style="align-content:center">
+                    <button id="crea-ordine">Crea nuovo ordine</button>
+                </div>
+                <div class="col-5"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 box-gray-ordini">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Ordine numero:</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Cliente:</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Data:</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Codici articoli:</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--FINE SEZIONE ORDINI-->
+
+        <!--SEZIONE CREAZIONE ORDINE-->
+        <div id="sezione-crea-ordine">
+            <form class="row">
+                <div class="col-md-8 box-gray-ordini">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Ordine numero:</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Cliente</h4>
+                                <input class="col-6">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Data:</h4>
+                                <input class="col-6">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Codici articoli:</h4>
+                                <p class="col-6">prova</p>
+                                <p class="col-6"></p>
+                                <p class="col-6">prova</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row div-tasti">
+                <button class="tasto-canc" id="indietro-ordine"> indietro</button>
+                <button class="tasto-ins">crea</button>
+            </div>
+        </div>
+        <!--FINE SEZIONE CREAZIONE ORDINE-->
+
+        <!--SEZIONE ACCOUNT-->
+        <div class="row" id="sezione-account">
+            <form class="col-md-8 box-gray-account">
+                <div class="row">
+                    <div class="col-6" style="margin: auto">
+                        <div class="col-12">
+                            <p>Email</p>
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="email">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit">Modifica email</button>
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="password">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit">Modifica password</button>
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="rappresentante-nome">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="rappresentante-password">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit">Crea rappresentante</button>
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="rappresentante-nome">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit">Modidfica rappresentante</button>
+                        </div>
+                    </div>
+                    <div class="col-4"></div>
+                </div>
+            </form>
+        </div>
+        <!--FINE SEZIONE ACCOUNT-->
+
+        <!--SEZIONE CLIENTI-->
+        <div id="sezione-clienti">
+            <div class="row">
+                <div class="col-5"></div>
+                <div class="col-2" style="align-content:center">
+                    <button id="agg-cliente">Aggiungi nuovo cliente</button>
+                </div>
+                <div class="col-5"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 box-gray-clienti">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Nome e cognome</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">ordine num</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">data</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">ragione sociale</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">via</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">cap</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">città</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">provincia</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Partita Iva</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">codice fiscale</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">codice SDI</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Email</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Telefono</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Banca</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Iban</h4>
+                                <p class="col-6"></p>
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">tipo pagamento</h4>
+                                <p class="col-6"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--FINE SEZIONE CLIENTI-->
+
+        <!--SEZIONE aggiunta cliente-->
+        <div id="sezione-add-clienti">
+            <form class="row">
+                <div class="col-md-8 box-gray-clienti">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Nome e cognome</h4>
+                                <input class="input_cliente col-6" type="text" name="nome-cognome">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">ragione sociale</h4>
+                                <input class="input_cliente col-6" type="text" name="ragione-sociale">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">provincia</h4>
+                                <input class="input_cliente" type="text" name="provincia">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">città</h4>
+                                <input class="input_cliente" type="text" name="città">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">C.A.P</h4>
+                                <input class="input_cliente" type="text" name="cap">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">indirizzo</h4>
+                                <input class="input_cliente" type="text" name="indirizzo">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">nazione</h4>
+                                <input class="input_cliente" type="text" name="nazione">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Partita Iva</h4>
+                                <input class="input_cliente" type="text" name="partita-iva">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">codice fiscale</h4>
+                                <input class="input_cliente" type="text" name="codice-fiscale">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">codice SDI</h4>
+                                <input class="input_cliente" type="text" name="codice-sdi">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Email</h4>
+                                <input class="input_cliente" type="text" name="email">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Telefono</h4>
+                                <input class="input_cliente" type="text" name="telefono">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">Banca</h4>
+                                <input class="input_cliente" type="text" name="banca">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="row">
+                                <h4 class="col-6">Iban</h4>
+                                <input class="input_cliente" type="text" name="iban">
+                            </div>
+                            <div class="row">
+                                <h4 class="col-6">tipo pagamento</h4>
+                                <input class="input_cliente" type="text" name="tipo-pagamento">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row div-tasti">
+                <button class="tasto-canc" id="indietro-cliente"> indietro</button>
+                <button class="tasto-ins">Inserisci</button>
+            </div>
+        </div>
+        <!--FINE SEZIONE aggiunta CLIENTI-->
+
+    </div>
+{% endblock %}
