@@ -87,7 +87,7 @@
                             </div>
                             <div class="row">
                                 <div class="controls">
-                                    <form method="get" action="{{ url_for('modifica_ordine') }}">
+                                    <form method="post" action="{{ url_for('modifica_ordine') }}">
                                         <input class="col-6 hidden" name="ordine_numero" type="text" value="{{ i[0] }}">
                                         <input id="modify" type="submit" value="modify">
                                     </form>

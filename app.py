@@ -51,6 +51,17 @@ def logging():  #admin/admin   agent/123     agent2/123
 @app.route('/adding_orders', methods=["POST"])
 def adding_orders():
     global indice_ordini
+    try:
+        if request.form["tipo"] == "update":
+            result = mongo.db.utenti.update_one({"ordine_numero": request.form["ordine_numero"]},
+                                                {"$set": {"codice_cliente": request.form["codice_cliente"],
+                                                          "pagamento": request.form["pagamento"],
+                                                          "data": request.form["data"]}})
+            print(result)
+            return redirect(url_for("home"))
+    except:
+        print("update failed")
+
     if indice_ordini == 0:
         ordine_numero = 1
         indice_ordini = indice_ordini + 1
@@ -72,10 +83,11 @@ def adding_orders():
         return redirect(url_for("home"))  # call the method home to load fresh data on access
 
 
-@app.route('/modifica_ordine', methods=["POST", "GET"])
+@app.route('/modifica_ordine', methods=["POST"])
 def modifica_ordine():
     print("modifica")
-    return render_template("home.html")
+    cursore = mongo.db.ordini.find_one({"ordine_numero": request.form["ordine_numero"]})
+    return render_template("modify-order.html", ordine=cursore)
 
 
 @app.route('/elimina_ordine', methods=['POST'])
