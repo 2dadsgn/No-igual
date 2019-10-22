@@ -56,12 +56,14 @@
                     {% if i== none %}
                         <div style="height: 100px;width: 100px" class="box-gray-ordini"><p>Empty</p></div>
                     {% else %}
-                        <div class="col-md-8 box-gray-ordini">
+                        <div class="col-md-8 box-gray-ordini" method="post">
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="row">
                                         <h4 class="col-6">Ordine numero:</h4>
                                         <p class="col-6">{{ i[0] }}</p>
+
+
                                     </div>
                                     <div class="row">
                                         <h4 class="col-6">Nome Cliente:</h4>
@@ -76,7 +78,7 @@
                                         <p class="col-6">{{ i[3] }}</p>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-12">
                                     <div class="row">
                                         <h4 class="col-6">Codici articoli:</h4>
                                         <p class="col-6"></p>
@@ -85,8 +87,16 @@
                             </div>
                             <div class="row">
                                 <div class="controls">
-                                    <img id="modify" src="{{ url_for('static',filename='modify.png') }}">
-                                    <img id="delete" src="{{ url_for('static',filename='delete.png') }}">
+                                    <form method="get" action="{{ url_for('modifica_ordine') }}">
+                                        <input class="col-6 hidden" name="ordine_numero" type="text" value="{{ i[0] }}">
+                                        <input id="modify" type="submit" value="modify">
+                                    </form>
+                                    <form method="post" action="{{ url_for('elimina_ordine') }}">
+                                        <input class="col-6 hidden" name="ordine_numero" type="text" value="{{ i[0] }}">
+                                        <input id="delete" type="submit" value="delete">
+                                    </form>
+
+
                                 </div>
                                 <input class="hidden" type="text" name="ordine_numero" value="{{ i[0] }}">
                             </div>
@@ -101,27 +111,21 @@
         <form id="sezione-crea-ordine" method="post" action="{{ url_for('adding_orders') }}">
             <div class="col-md-8 box-gray-ordini-crea">
                 <div class="row">
-                    <div class="col-4">
-                        <h4 class="col-6">Ordine numero:</h4>
-                        <input type="text" name="ordine_numero" class="col-6">
-                        <h4 class="col-6">Nome Cliente:</h4>
-                        <input type="text" name="nome_cliente" class="col-6">
-                        <h4 class="col-6">cognome Cliente:</h4>
-                        <input type="text" name="cognome_cliente" class="col-6">
+                    <div class="col-12">
+                        <h4 class="col-6">Cliente </h4>
+                        <p class="col-6">lista</p>
+
+                        <h4 class="col-6">Codice Cliente:</h4>
+                        <input type="text" name="codice_cliente" class="col-6">
+
+                        <h4 class="col-6">Pagamento</h4>
+                        <input type="text" name="pagamento" class="col-6">
+
                         <h4 class="col-6">Data:</h4>
                         <input type="date" name="data" class="col-6">
                     </div>
-                    <div class="col-4">
-                        <h4 class="col-6">Ordine numero:</h4>
-                        <input type="text" name="ordine_numero" class="col-6">
-                        <h4 class="col-6">Nome Cliente:</h4>
-                        <input type="text" name="nome_cliente" class="col-6">
-                        <h4 class="col-6">cognome Cliente:</h4>
-                        <input type="text" name="cognome_cliente" class="col-6">
-                        <h4 class="col-6">Data:</h4>
-                        <input type="date" name="data" class="col-6">
-                    </div>
-                    <div class="col-4">
+
+                    <div class="col-12">
                         <h4 class="col-6">Codici articoli:</h4>
                         <p class="col-6">prova</p>
                         <p class="col-6"></p>
