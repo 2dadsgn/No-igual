@@ -73,3 +73,24 @@ function menu_close() {
     document.getElementById("hamburgher").style.display = 'block';
     document.getElementById("menu-scomp").style.right = "-55vw";
 }
+
+document.getElementById("nav").addEventListener("mouseover", function () {
+    sfoca();
+
+});
+document.getElementById("nav").addEventListener("mouseout", function () {
+    rifoca();
+
+});
+
+function sfoca() {
+    console.log("sfoco");
+    document.getElementById("container-fluid").style.filter = "blur(2.5px)";
+
+}
+
+function rifoca() {
+    console.log("rifoco");
+    document.getElementById("container-fluid").style.filter = "blur(0px)";
+
+}

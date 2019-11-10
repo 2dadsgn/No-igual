@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% block body %}
-    <div class="container-fluid">
-        <nav>
-            <ol>
-                <li class="menuli" id="clienti">Clienti</li>
-                <li class="menuli" id="ordini">Ordini</li>
-                <li class="menuli" id="espositore">Espositore</li>
-                <li class="menuli" id="account">Account</li>
+    <nav id="nav">
+        <a>
+            <li class="menuli" id="clienti">Clienti</li>
+            <li class="menuli" id="ordini">Ordini</li>
+            <li class="menuli" id="espositore">Espositore</li>
+            <li class="menuli" id="account">Account</li>
             </ol>
-            <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}" width="130"
-                 height="106" alt=""/>
+            <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
+                 width="130" height="106" alt=""/>
             <div class="menu-scomparsa" id="menu-scomp">
-                <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}" width="216"
-                                      height="212" alt=""/></div>
+                <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
+                                      width="216" height="212" alt=""/></div>
                 <div class="row">
                     <ol class="ol-scomparsa">
                         <li>Log Out</li>
@@ -20,31 +19,41 @@
                 </div>
             </div>
             <div id="exit"></div>
-        </nav>
+    </nav>
+    <div class="container-fluid">
 
-        {% if utente=="admin" %}
-            <img style="position:fixed; top: 1vh;left: 1vw;"
-                 src="{{ url_for('static',filename='iconfinder_flash-cloud_2995010.png') }}" height="35px" width="40px">
-        {% endif %}
         <!--SEZIONE ESPOSITORE-->
         <div class="row" id="sezione-espositore">
-            <button>modifica</button>
-            <div class="col-md-3" style="text-align: center;align-content: center">
+
+
+            <div class="row">
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Lorem Ipsum</h2>
+                        <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140"
+                             height="140"
+                             alt=""/>
+                    </div>
+            <div class="col-1"></div>
+            <div class="col-md-3">
                 <h2>Lorem Ipsum</h2>
-                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
+                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
                      alt=""/></div>
             <div class="col-1"></div>
             <div class="col-md-3">
                 <h2>Lorem Ipsum</h2>
-                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
+                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
                      alt=""/></div>
             <div class="col-1"></div>
-            <div class="col-md-3">
-                <h2>Lorem Ipsum</h2>
-                <img class="img-ogg" src="{{ url_for('static',filename='140x140.gif') }}" width="140" height="140"
-                     alt=""/></div>
-            <div class="col-1"></div>
+                </div>
+
+            </div>
+
+
         </div>
+
+
         <!--FINE SEZXIONE ESPOSITORE-->
 
         <!--SEZIONE ORDINI-->
@@ -62,24 +71,30 @@
                     {% if i== none %}
                         <div style="height: 100px;width: 100px" class="box-gray-ordini"><p>Empty</p></div>
                     {% else %}
-                        <div class="col-md-8 box-gray-ordini">
+                        <div class="col-md-8 box-gray-ordini" method="post">
                             <div class="row">
                                 <div class="col-6">
                                     <div class="row">
                                         <h4 class="col-6">Ordine numero:</h4>
-                                        <p class="col-6">{{ i[0] }}</p>
+                                        <p class="col-6">{{ i["ordine_numero"] }}</p>
+
+
                                     </div>
                                     <div class="row">
-                                        <h4 class="col-6">Nome Cliente:</h4>
-                                        <p class="col-6">{{ i[1] }}</p>
+                                        <h4 class="col-6">Codice Cliente:</h4>
+                                        <p class="col-6">{{ i["codice_cliente"] }}</p>
                                     </div>
                                     <div class="row">
-                                        <h4 class="col-6">Cognome Cliente:</h4>
-                                        <p class="col-6">{{ i[2] }}</p>
+                                        <h4 class="col-6">Ragione Sociale:</h4>
+                                        <p class="col-6">{{ i["ragione_sociale"] }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <h4 class="col-6">Pagamento:</h4>
+                                        <p class="col-6">{{ i["pagamento"] }}</p>
                                     </div>
                                     <div class="row">
                                         <h4 class="col-6">Data:</h4>
-                                        <p class="col-6">{{ i[3] }}</p>
+                                        <p class="col-6">{{ i["data"] }}</p>
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -91,8 +106,18 @@
                             </div>
                             <div class="row">
                                 <div class="controls">
-                                    <img id="modify" src="{{ url_for('static',filename='modify.png') }}">
-                                    <img id="delete" src="{{ url_for('static',filename='delete.png') }}">
+                                    <form method="post" action="{{ url_for('modifica_ordine') }}">
+                                        <input class="col-6 hidden" name="ordine_numero" type="text"
+                                               value="{{ i["ordine_numero"] }}">
+                                        <input id="modify" type="submit" value="modify">
+                                    </form>
+                                    <form method="post" action="{{ url_for('elimina_ordine') }}">
+                                        <input class="col-6 hidden" name="ordine_numero" type="text"
+                                               value="{{ i["ordine_numero"] }}">
+                                        <input id="delete" type="submit" value="delete">
+                                    </form>
+
+
                                 </div>
                                 <input class="hidden" type="text" name="ordine_numero" value="{{ i[0] }}">
                             </div>
@@ -108,14 +133,27 @@
             <div class="col-md-8 box-gray-ordini-crea">
                 <div class="row">
                     <div class="col-12">
+                        <input class="hidden" name="tipo" value="new" type="text">
                         <h4 class="col-6">Cliente </h4>
-                        <p class="col-6">lista</p>
-
-                        <h4 class="col-6">Codice Cliente:</h4>
-                        <input type="text" name="codice_cliente" class="col-6">
+                        <select name="ragione_sociale">
+                            {% if clienti %}
+                                {% for d in clienti %}
+                                    <option value="{{ d["ragione_sociale"] }}">{{ d["ragione_sociale"] }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="empty"></option>
+                            {% endif %}
+                        </select>
 
                         <h4 class="col-6">Pagamento</h4>
-                        <input type="text" name="pagamento" class="col-6">
+                        <select name="pagamento">
+                            <option value="riba">RIBA</option>
+                            <option value="rid">RID</option>
+                            <option value="rimessa diretta">Rimessa diretta</option>
+                            <option value="contrassegno">Contrassegno</option>
+                            <option value="bonifico">Bonifico</option>
+                            <option value="assegno">Assegno</option>
+                        </select>
 
                         <h4 class="col-6">Data:</h4>
                         <input type="date" name="data" class="col-6">
@@ -138,43 +176,27 @@
 
         <!--SEZIONE ACCOUNT-->
         <div class="row" id="sezione-account">
-            <form class="col-md-8 box-gray-account">
-                <div class="row">
-                    <div class="col-6" style="margin: auto">
-                        <div class="col-12">
-                            <p>Email</p>
-                        </div>
-                        <div class="col-12">
-                            <input type="text" name="email">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit">Modifica email</button>
-                        </div>
-                        <div class="col-12">
-                            <input type="text" name="password">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit">Modifica password</button>
-                        </div>
-                        <div class="col-12">
-                            <input type="text" name="rappresentante-nome">
-                        </div>
-                        <div class="col-12">
-                            <input type="text" name="rappresentante-password">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit">Crea rappresentante</button>
-                        </div>
-                        <div class="col-12">
-                            <input type="text" name="rappresentante-nome">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit">Modidfica rappresentante</button>
-                        </div>
+            <div class="row">
+                <div class="col-md-8 box-gray-account">
+                    <div class="row">
+                        <form enctype=multipart/form-data action="{{ url_for('upload_file') }}">
+                            <div class="col-4"></div>
+                            <div class="col-4">
+
+                                <input type="file" style="z-index: 200">
+                                <input type="submit" value="Inserisci">
+                            </div>
+                            <div class="col-4"></div>
+                        </form>
                     </div>
-                    <div class="col-4"></div>
+                    <div class="row">
+                        <div class="col-4"></div>
+                        <div class="col-4"></div>
+                        <div class="col-4"></div>
+                    </div>
                 </div>
-            </form>
+            </div>
+
         </div>
         <!--FINE SEZIONE ACCOUNT-->
 
@@ -187,179 +209,124 @@
                 </div>
                 <div class="col-5"></div>
             </div>
-            <div class="row">
-                <div class="col-md-8 box-gray-clienti">
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Nome e cognome</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">ordine num</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">data</h4>
-                                <p class="col-6"></p>
-                            </div>
+            {% if clienti== "none" %}
+                <p>none</p>
+            {% else %}
+                {% for i in clienti %}
+                    <div class="col-md-10 box-gray-clienti">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="row">
+                                    <h4 class="col-6">Nome</h4>
+                                    <p class="col-6">{{ i["nome"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Cognome</h4>
+                                    <p class="col-6">{{ i["cognome"] }}</p>
                         </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">ragione sociale</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">via</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">cap</h4>
-                                <p class="col-6"></p>
-                            </div>
+                                <div class="row">
+                                    <h4 class="col-6">Ragione sociale</h4>
+                                    <p class="col-6">{{ i["ragione_sociale"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Via</h4>
+                                    <p class="col-6">{{ i["via"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">CAP</h4>
+                                    <p class="col-6">{{ i["cap"] }}</p>
                         </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">città</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">provincia</h4>
-                                <p class="col-6"></p>
+                                <div class="row">
+                                    <h4 class="col-6">Città</h4>
+                                    <p class="col-6">{{ i["citta"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Provincia</h4>
+                                    <p class="col-6">{{ i["provincia"] }}</p>
+                        </div>
+
+                    </div>
+                            <div class="col-6">
+                                <div class="row">
+                                    <h4 class="col-6">Partita IVA</h4>
+                                    <p class="col-6">{{ i["partita_iva"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Codice Fiscale</h4>
+                                    <p class="col-6">{{ i["codice_fiscale"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Codice SDI</h4>
+                                    <p class="col-6">{{ i["ragione_sdi"] }}</p>
+                        </div>
+                                <div class="row">
+                                    <h4 class="col-6">Email</h4>
+                                    <p class="col-6">{{ i["email"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Telefono</h4>
+                                    <p class="col-6">{{ i["telefono"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Banca</h4>
+                                    <p class="col-6">{{ i["banca"] }}</p>
+                        </div>
+                                <div class="row">
+                                    <h4 class="col-6">Iban</h4>
+                                    <p class="col-6">{{ i["iban"] }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Partita Iva</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">codice fiscale</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">codice SDI</h4>
-                                <p class="col-6"></p>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Email</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">Telefono</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">Banca</h4>
-                                <p class="col-6"></p>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Iban</h4>
-                                <p class="col-6"></p>
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">tipo pagamento</h4>
-                                <p class="col-6"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                {% endfor %}
+            {% endif %}
         </div>
         <!--FINE SEZIONE CLIENTI-->
 
         <!--SEZIONE aggiunta cliente-->
         <div id="sezione-add-clienti">
-            <form class="row">
-                <div class="col-md-8 box-gray-clienti">
+            <form method="post" action="{{ url_for('adding_customer') }}">
+                <div class="col-md-10 box-gray-clienti-add">
                     <div class="row">
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Nome e cognome</h4>
-                                <input class="input_cliente col-6" type="text" name="nome-cognome">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">ragione sociale</h4>
-                                <input class="input_cliente col-6" type="text" name="ragione-sociale">
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">provincia</h4>
-                                <input class="input_cliente" type="text" name="provincia">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">città</h4>
-                                <input class="input_cliente" type="text" name="città">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">C.A.P</h4>
-                                <input class="input_cliente" type="text" name="cap">
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">indirizzo</h4>
-                                <input class="input_cliente" type="text" name="indirizzo">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">nazione</h4>
-                                <input class="input_cliente" type="text" name="nazione">
-                            </div>
-                        </div>
+                        <div class="col-6">
+                            <h4 class="col-6">Nome</h4>
+                            <input name="nome" type="text">
+                            <h4 class="col-6">cognome</h4>
+                            <input name="cognome" type="text">
+                            <h4 class="col-6">ragione sociale</h4>
+                            <input name="ragione_sociale" type="text">
+                            <h4 class="col-6">via</h4>
+                            <input name="via" type="text">
+                            <h4 class="col-6">cap</h4>
+                            <input name="cap" type="text">
+                            <h4 class="col-6">città</h4>
+                            <input name="città" type="text">
+                            <h4 class="col-6">provincia</h4>
+                            <input name="provincia" type="text">
                     </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Partita Iva</h4>
-                                <input class="input_cliente" type="text" name="partita-iva">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">codice fiscale</h4>
-                                <input class="input_cliente" type="text" name="codice-fiscale">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">codice SDI</h4>
-                                <input class="input_cliente" type="text" name="codice-sdi">
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Email</h4>
-                                <input class="input_cliente" type="text" name="email">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">Telefono</h4>
-                                <input class="input_cliente" type="text" name="telefono">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">Banca</h4>
-                                <input class="input_cliente" type="text" name="banca">
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="row">
-                                <h4 class="col-6">Iban</h4>
-                                <input class="input_cliente" type="text" name="iban">
-                            </div>
-                            <div class="row">
-                                <h4 class="col-6">tipo pagamento</h4>
-                                <input class="input_cliente" type="text" name="tipo-pagamento">
-                            </div>
+                        <div class="col-6">
+                            <h4 class="col-6">Partita Iva</h4>
+                            <input name="partita_iva" type="text">
+                            <h4 class="col-6">codice fiscale</h4>
+                            <input name="codice_fiscale" type="text">
+                            <h4 class="col-6">codice SDI</h4>
+                            <input name="codice_sdi" type="text">
+                            <h4 class="col-6">Email</h4>
+                            <input name="email" type="text">
+                            <h4 class="col-6">Telefono</h4>
+                            <input name="telefono" type="text">
+                            <h4 class="col-6">Banca</h4>
+                            <input name="banca" type="text">
+                            <h4 class="col-6">Iban</h4>
+                            <input name="iban" type="text">
                         </div>
                     </div>
                 </div>
-            </form>
             <div class="row div-tasti">
                 <button class="tasto-canc" id="indietro-cliente"> indietro</button>
-                <button class="tasto-ins">Inserisci</button>
+                <input type="submit" value="Inserisci">
             </div>
+            </form>
         </div>
         <!--FINE SEZIONE aggiunta CLIENTI-->
 
