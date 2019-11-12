@@ -179,11 +179,11 @@
             <div class="row">
                 <div class="col-md-8 box-gray-account">
                     <div class="row">
-                        <form enctype=multipart/form-data action="{{ url_for('upload_file') }}">
+                        <form enctype="multipart/form-data" method="POST" action="{{ url_for('upload_file') }}">
                             <div class="col-4"></div>
                             <div class="col-4">
 
-                                <input type="file" style="z-index: 200">
+                                <input type="file" name="file" multiple>
                                 <input type="submit" value="Inserisci">
                             </div>
                             <div class="col-4"></div>
@@ -298,7 +298,7 @@
                             <h4 class="col-6">via</h4>
                             <input name="via" type="text">
                             <h4 class="col-6">cap</h4>
-                            <input name="cap" type="text">
+                            <input name="cap" type="number">
                             <h4 class="col-6">città</h4>
                             <input name="città" type="text">
                             <h4 class="col-6">provincia</h4>
@@ -312,7 +312,7 @@
                             <h4 class="col-6">codice SDI</h4>
                             <input name="codice_sdi" type="text">
                             <h4 class="col-6">Email</h4>
-                            <input name="email" type="text">
+                            <input name="email" type="email">
                             <h4 class="col-6">Telefono</h4>
                             <input name="telefono" type="text">
                             <h4 class="col-6">Banca</h4>

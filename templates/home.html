@@ -3,8 +3,8 @@
     <div class="container-fluid">
         <form id="login" class="row" action="{{ url_for("logging") }}" method="post">
             <h1 class="col-12 titolo" id="titolo-noigual">No Igual</h1>
-            <h1 class="col-12">Username</h1>
-            <input class="col-8 input-form" type="text" name="username" value="" style="text-align: center">
+            <h1 class="col-12">Email</h1>
+            <input class="col-8 input-form" type="email" name="username" value="" style="text-align: center">
             <p class="errrore">{{ error_name }}</p>
             <h1 class="col-12">Password</h1>
             <input class="col-8 input-form" type="password" name="password" value="" style="text-align: center">
