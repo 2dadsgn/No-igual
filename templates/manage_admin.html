@@ -1,52 +1,51 @@
 {% extends "base.html" %}
 {% block body %}
     <nav id="nav">
-        <a>
+        <ol>
             <li class="menuli" id="clienti">Clienti</li>
             <li class="menuli" id="ordini">Ordini</li>
-            <li class="menuli" id="espositore">Espositore</li>
+            <li class="menuli" id="espositore" onclick="http('/home',)">Espositore</li>
             <li class="menuli" id="account">Account</li>
-            </ol>
-            <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
-                 width="130" height="106" alt=""/>
-            <div class="menu-scomparsa" id="menu-scomp">
-                <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
-                                      width="216" height="212" alt=""/></div>
-                <div class="row">
-                    <ol class="ol-scomparsa">
-                        <li>Log Out</li>
-                    </ol>
-                </div>
+        </ol>
+        <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
+             width="130" height="106" alt=""/>
+        <div class="menu-scomparsa" id="menu-scomp">
+            <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
+                                  width="216" height="212" alt=""/></div>
+            <div class="row">
+                <ol class="ol-scomparsa">
+                    <li>Log Out</li>
+                </ol>
             </div>
-            <div id="exit"></div>
+        </div>
+        <div id="exit"></div>
     </nav>
-    <div class="container-fluid">
+    <div class="container-fluid" id="fluid">
 
         <!--SEZIONE ESPOSITORE-->
         <div class="row" id="sezione-espositore">
 
 
             <div class="row">
-                <div class="row"></div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <h2>Lorem Ipsum</h2>
-                        <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140"
-                             height="140"
-                             alt=""/>
+
+
+                {% for i in nomi_brand %}
+                    <div class="col-1 col-md-2 col-lg-1"></div>
+
+                    <div class="col-10 col-md-3 col-lg-2">
+                        <form action="{{ url_for("mostra_espositore") }}" method="post">
+                            <h2>{{ i["brand"] }}</h2>
+
+                            <img id="imgclick" onclick="http('/espositore','fluid','{{ i["brand"] }}')" class="img-ogg"
+                                 src="{{ url_for('static',filename='140X140.gif') }}" width="100%"
+                                 height="100%"
+                                 alt=""/>
+
+                        </form>
                     </div>
-            <div class="col-1"></div>
-            <div class="col-md-3">
-                <h2>Lorem Ipsum</h2>
-                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
-                     alt=""/></div>
-            <div class="col-1"></div>
-            <div class="col-md-3">
-                <h2>Lorem Ipsum</h2>
-                <img class="img-ogg" src="{{ url_for('static',filename='140X140.gif') }}" width="140" height="140"
-                     alt=""/></div>
-            <div class="col-1"></div>
-                </div>
+                    <div class="col-1 col-md-1 col-lg-1"></div>
+                {% endfor %}
+
 
             </div>
 
@@ -180,9 +179,13 @@
                 <div class="col-md-8 box-gray-account">
                     <div class="row">
                         <form enctype="multipart/form-data" method="POST" action="{{ url_for('upload_file') }}">
-                            <div class="col-4"></div>
                             <div class="col-4">
-
+                                <h4 class="col-12">Brand:</h4>
+                                <input class="col-12" type="text" name="brand">
+                                <h4 class="col-12">Nome album:</h4>
+                                <input class="col-12" type="text" name="album">
+                            </div>
+                            <div class="col-4">
                                 <input type="file" name="file" multiple>
                                 <input type="submit" value="Inserisci">
                             </div>
@@ -223,7 +226,7 @@
                                 <div class="row">
                                     <h4 class="col-6">Cognome</h4>
                                     <p class="col-6">{{ i["cognome"] }}</p>
-                        </div>
+                                </div>
                                 <div class="row">
                                     <h4 class="col-6">Ragione sociale</h4>
                                     <p class="col-6">{{ i["ragione_sociale"] }}</p>
@@ -235,7 +238,7 @@
                                 <div class="row">
                                     <h4 class="col-6">CAP</h4>
                                     <p class="col-6">{{ i["cap"] }}</p>
-                        </div>
+                                </div>
                                 <div class="row">
                                     <h4 class="col-6">Città</h4>
                                     <p class="col-6">{{ i["citta"] }}</p>
@@ -243,9 +246,9 @@
                                 <div class="row">
                                     <h4 class="col-6">Provincia</h4>
                                     <p class="col-6">{{ i["provincia"] }}</p>
-                        </div>
+                                </div>
 
-                    </div>
+                            </div>
                             <div class="col-6">
                                 <div class="row">
                                     <h4 class="col-6">Partita IVA</h4>
@@ -258,7 +261,7 @@
                                 <div class="row">
                                     <h4 class="col-6">Codice SDI</h4>
                                     <p class="col-6">{{ i["ragione_sdi"] }}</p>
-                        </div>
+                                </div>
                                 <div class="row">
                                     <h4 class="col-6">Email</h4>
                                     <p class="col-6">{{ i["email"] }}</p>
@@ -270,7 +273,7 @@
                                 <div class="row">
                                     <h4 class="col-6">Banca</h4>
                                     <p class="col-6">{{ i["banca"] }}</p>
-                        </div>
+                                </div>
                                 <div class="row">
                                     <h4 class="col-6">Iban</h4>
                                     <p class="col-6">{{ i["iban"] }}</p>
@@ -303,7 +306,7 @@
                             <input name="città" type="text">
                             <h4 class="col-6">provincia</h4>
                             <input name="provincia" type="text">
-                    </div>
+                        </div>
                         <div class="col-6">
                             <h4 class="col-6">Partita Iva</h4>
                             <input name="partita_iva" type="text">
@@ -322,10 +325,10 @@
                         </div>
                     </div>
                 </div>
-            <div class="row div-tasti">
-                <button class="tasto-canc" id="indietro-cliente"> indietro</button>
-                <input type="submit" value="Inserisci">
-            </div>
+                <div class="row div-tasti">
+                    <button class="tasto-canc" id="indietro-cliente"> indietro</button>
+                    <input type="submit" value="Inserisci">
+                </div>
             </form>
         </div>
         <!--FINE SEZIONE aggiunta CLIENTI-->

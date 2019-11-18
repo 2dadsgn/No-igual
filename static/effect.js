@@ -94,3 +94,22 @@ function rifoca() {
     document.getElementById("container-fluid").style.filter = "blur(0px)";
 
 }
+
+
+/* AJAX REQUEST for albums*/
+function http(url, target, value) {
+    console.log("GET me " + url + " to " + target);
+    const Http = new XMLHttpRequest();
+    var qui = document.getElementById(target);
+    Http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            qui.innerHTML = this.responseText;
+        } else {
+            qui.innerHTML = this.status;
+        }
+    }
+
+    Http.open("POST", url);
+    Http.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    Http.send("value=" + value);
+}

@@ -5,9 +5,8 @@ from flask_pymongo import PyMongo
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/upload'
+UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
 
 app = Flask(__name__)
 # config for the upload folder
@@ -17,10 +16,17 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/db-noigual"
 mongo = PyMongo(app)
 app.secret_key = b'_52ksaLFwerWWrcdesal'
 
+app.debug = True
+
+app.host = '0.0.0.0'
+
 # global orders index
 indice_ordini = 0
 # global clients code
 codice_clienti = 0
+# nomifile global
+nomi_file = []
+
 
 @app.route('/')
 def index():
@@ -28,7 +34,7 @@ def index():
 
 
 @app.route('/logging', methods=["POST"])
-def logging():  #admin/admin   agent/123     agent2/123
+def logging():  # admin/admin   agent/123     agent2/123
     username = request.form["username"]
     password = request.form["password"]
 
@@ -37,7 +43,7 @@ def logging():  #admin/admin   agent/123     agent2/123
     if cursore == None:
         errore = "utente non  registrato"
         # ELIMINARE RIGA BELOW
-        #mongo.db.utenti.insert({"username": username, "password": generate_password_hash(password), "admin": "yes"})
+        # mongo.db.utenti.insert({"username": username, "password": generate_password_hash(password), "admin": "yes"})
         return render_template('home.html', error_name=errore)
 
     else:
@@ -142,14 +148,16 @@ def adding_customer():
     return redirect(url_for('home'))
 
 
-
 # this method return the homepage with all the refreshed data from DB
 @app.route('/home')
 def home():
     global indice_ordini
     try:
         # dictionary per i clienti
-
+        brand = mongo.db.brand.find()
+        nomi_brand = []
+        for i in brand:
+            nomi_brand.append(i)
         clienti = mongo.db.clienti.find().sort("ragione_sociale", 1)
         arrayclienti = []
         for x in clienti:
@@ -171,14 +179,14 @@ def home():
         if ordini:
             indice_ordini = int(ordini[0]["ordine_numero"])
         else:
-            indice_ordini=0
+            indice_ordini = 0
 
     except:
         print("--erorre in home---")
     if session["type"] == "admin":
-        return render_template("manage_admin.html", ordini=ordini, clienti=arrayclienti)
+        return render_template("manage_admin.html", ordini=ordini, clienti=arrayclienti, nomi_brand=nomi_brand)
     else:
-        return render_template("manage_agent.html", ordini=ordini, clienti=arrayclienti)
+        return render_template("manage_agent.html", ordini=ordini, clienti=arrayclienti, nomi_brand=nomi_brand)
 
 
 def allowed_file(filename):
@@ -186,14 +194,64 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/uploading', methods=['GET', 'POST'])
+@app.route('/upload_info', methods=['POST'])
+def upload_info_file():
+    brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
+
+    espositore = []
+    categorie = []
+    # ciclo for to create array espositore and dictionary within inside
+    for i in nomi_file:
+        espo = {"immagine": i,
+                "codice": request.form[f"codice_id{i}"],
+                "prezzo": request.form[f"prezzo{i}"]}
+        espositore.append(espo.copy())
+        espo.clear()
+
+    t = 0
+
+    for i in brand_cursore:
+        t = t + 1
+
+    if t == 0:
+        print("insert")
+        categorie.append(f"{request.form['album']}")
+
+        mongo.db.brand.insert({
+            "brand": request.form["brand"],
+            "categorie": categorie,
+            f"{request.form['album']}": espositore
+        })
+    else:
+        print("update")
+        brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
+        for i in brand_cursore:
+            print(i)
+
+        # qui problema con cursore pymongo????
+
+        mongo.db.brand.update_one({"brand": request.form["brand"]},
+                                  {"$set": {"categorie": categorie,
+                                            f"{request.form['album']}": espositore}})
+
+    return redirect(url_for("home"))
+
+
+@app.route('/uploading', methods=['POST'])
 def upload_file():
+    nomi_file.clear()  #pulisco array per evitare sovrapposizioni in upload successivi
     if request.method == 'POST':
+
+        file = request.files.getlist("file")
+
+        for i in file:
+            nomi_file.append(i.filename)
+
+
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
-        file = request.files.getlist("file")
 
         # if user does not select file, browser also
         # submit an empty part without filename
@@ -202,13 +260,25 @@ def upload_file():
                 flash('No selected file')
                 return redirect(request.url)
 
-        # devo risolvere problema salvataggio file multipli
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('home'))
-    return redirect(url_for("home"))
+        # qui loop for per save multiple files
+        for t in file:
+            if t and allowed_file(t.filename):
+                filename = secure_filename(t.filename)
+                t.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return render_template("upload.html", nomi_file=nomi_file,
+                               album=request.form["album"], brand=request.form["brand"])
+    return "<h1>errore in upload del file</h1>"
 
+
+@app.route("/espositore", methods=["POST", "GET"])
+def mostra_espositore():
+    brand = mongo.db.brand.find({"brand": request.form["value"]})
+    return render_template("album.html", album=brand)
+
+
+@app.route("/view_img", methods=["POST", "GET"])
+def view_img():
+    return render_template("view_img.html", url_foto=request.form["value"])
 
 
 if __name__ == '__main__':
