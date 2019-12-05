@@ -13,11 +13,35 @@
     <!-- Bootstrap -->
     <link href="{{ url_for('static', filename = 'bootstrap-4.3.1.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename = 'main.css') }}" rel="stylesheet">
+
 </head>
 <body>
-
+<div class="container-fluid">
+    <nav id="nav">
+        <ol>
+            <div class="menuli" id="cart" onclick="http('/routing','target','crea_ordine')">€</div>
+            <li class="menuli" id="clienti" onclick="http('/routing','target','clienti')">Clienti</li>
+            <li class="menuli" id="ordini" onclick="http('/routing','target','ordini')">Ordini</li>
+            <li class="menuli" id="espositore" onclick="http('/routing','target','espositore')">Espositore</li>
+            <li class="menuli" id="account" onclick="http('/routing','target','account')">Account</li>
+        </ol>
+        <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
+             width="130" height="106" alt=""/>
+        <div class="menu-scomparsa" id="menu-scomp">
+            <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
+                                  width="216" height="212" alt=""/></div>
+            <div class="row">
+                <ol class="ol-scomparsa">
+                    <li>Log Out</li>
+                </ol>
+            </div>
+        </div>
+        <div id="exit"></div>
+    </nav>
 {% block body %}
+
 {% endblock %}
+</div>
 
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -26,6 +50,7 @@
 <script src="{{ url_for('static',filename='popper.min.js') }}"></script>
 <script src="{{ url_for('static',filename='bootstrap-4.3.1.js') }}"></script>
 <script src="{{ url_for('static', filename = 'effect.js') }}"></script>
+
 
 </body>
 </html>

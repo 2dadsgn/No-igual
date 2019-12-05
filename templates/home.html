@@ -1,5 +1,20 @@
-{% extends "base.html" %}
-{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Oxygen&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|EB+Garamond:400,400i,500,500i,600,600i,700,700i,800,800i|Libre+Caslon+Display|Titillium+Web:200,200i,300,300i,400,400i,600,600i,700,700i,900&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>No Igual</title>
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename = 'bootstrap-4.3.1.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename = 'main.css') }}" rel="stylesheet">
+</head>
+<body>
     <div class="container-fluid">
         <form id="login" class="row" action="{{ url_for("logging") }}" method="post">
             <h1 class="col-12 titolo" id="titolo-noigual">No Igual</h1>
@@ -12,4 +27,12 @@
             <input class="col-6 login-tasto" type="submit" value="login">
         </form>
     </div>
-{% endblock %}
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="{{ url_for('static',filename='jquery-3.3.1.min.js') }}"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{ url_for('static',filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap-4.3.1.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'effect.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<div id="target">
+    <!--SEZIONE ORDINI-->
+    <div id="sezione-ordini">
+        <div class="row">
+            <div class="col-5"></div>
+            <div class="col-2" style="align-content:center">
+
+                <button id="crea-ordine" onclick="http('/routing','target','crea_ordine')">Crea nuovo ordine</button>
+            </div>
+            <div class="col-5"></div>
+        </div>
+        <div class="row">
+            {% for i in ordini %}
+                {% if i== none %}
+                    <div style="height: 100px;width: 100px" class="box-gray-ordini"><p>Empty</p></div>
+                {% else %}
+                    <div class="col-md-8 box-gray-ordini" method="post">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="row">
+                                    <h4 class="col-6">Ordine numero:</h4>
+                                    <p class="col-6">{{ i["ordine_numero"] }}</p>
+
+
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Codice Cliente:</h4>
+                                    <p class="col-6">{{ i["codice_cliente"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Ragione Sociale:</h4>
+                                    <p class="col-6">{{ i["ragione_sociale"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Pagamento:</h4>
+                                    <p class="col-6">{{ i["pagamento"] }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Data:</h4>
+                                    <p class="col-6">{{ i["data"] }}</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row">
+                                    <h4 class="col-6">Codici articoli:</h4>
+                                    {% for c in i["carrello"] %}
+                                        <p class="col-2">{{ c }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="controls">
+                                <button id="modify"
+                                        onclick="http('/modifica_ordine','target',{{ i["ordine_numero"] }})"> Modifica
+                                </button>
+                                <button id="delete" onclick="http('/elimina_ordine','target',{{ i["ordine_numero"] }})">
+                                    Elimina
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!--FINE SEZIONE ORDINI-->
+</div>

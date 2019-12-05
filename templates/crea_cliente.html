@@ -1,0 +1,53 @@
+<div id="target">
+    <!--SEZIONE aggiunta cliente-->
+    <div id="sezione-add-clienti">
+        <form method="post" action="{{ url_for('adding_customer') }}">
+            <div class="col-md-10 box-gray-clienti-add">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 class="col-6">Nome</h4>
+                        <input name="nome" type="text">
+                        <h4 class="col-6">cognome</h4>
+                        <input name="cognome" type="text">
+                        <h4 class="col-6">ragione sociale</h4>
+                        <input name="ragione_sociale" type="text">
+                        <h4 class="col-6">via</h4>
+                        <input name="via" type="text">
+                        <h4 class="col-6">cap</h4>
+                        <input name="cap" type="number">
+                        <h4 class="col-6">città</h4>
+                        <input name="città" type="text">
+                        <h4 class="col-6">provincia</h4>
+                        <input name="provincia" type="text">
+                    </div>
+                    <div class="col-6">
+                        <h4 class="col-6">Partita Iva</h4>
+                        <input name="partita_iva" type="text">
+                        <h4 class="col-6">codice fiscale</h4>
+                        <input name="codice_fiscale" type="text">
+                        <h4 class="col-6">codice SDI</h4>
+                        <input name="codice_sdi" type="text">
+                        <h4 class="col-6">Email</h4>
+                        <input name="email" type="email">
+                        <h4 class="col-6">Telefono</h4>
+                        <input name="telefono" type="text">
+                        <h4 class="col-6">Banca</h4>
+                        <input name="banca" type="text">
+                        <h4 class="col-6">Iban</h4>
+                        <input name="iban" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="row div-tasti">
+                <button class="tasto-canc" id="indietro-cliente" onclick="http('/routing','target','clienti')">
+                    indietro
+                </button>
+                <button type="submit" value="Inserisci">Inserisci</button>
+            </div>
+        </form>
+    </div>
+    <!--FINE SEZIONE aggiunta CLIENTI-->
+
+</div>
+
+

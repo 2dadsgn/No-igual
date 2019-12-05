@@ -1,61 +1,57 @@
-{% extends "base.html" %}
-{% block body %}
-    <div class="container-fluid">
-        <div class="container-fluid">
-            <form method="POST" action="{{ url_for('upload_info_file') }}">
-                <div class="row">
-                    <div class="col-4"></div>
-                    <div class="col-4">
-                        <h3 style="text-transform: uppercase;">{{ brand }} / {{ album }}</h3>
-                        <input class="hidden" type="text" value="{{ brand }}" name="brand">
-                        <input class="hidden" type="text" value="{{ album }}" name="album">
-                    </div>
-                    <div class="col-4"></div>
-                </div>
-                <div class="row">
-                    {% for i in nomi_file %}
-                        <div class="col-auto">
-                            <div class="row">
-                                <div class="col-4"></div>
-                                <div class="col-8">
-                                    <img height="200px" width="100%" src="{{ url_for("static",filename=i) }}">
-                                    <input class="hidden" type="text" name="nome_file" value="{{ i }}">
-                                </div>
-                                <div class="col-0"></div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4"></div>
-                                <div class="col-4">
-                                    <h4>Codice id</h4>
-                                    <input type="text" name="codice_id{{ i }}">
-                                </div>
-                                <div class="col-4"></div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4"></div>
-                                <div class="col-4">
-                                    <h4>Prezzo</h4>
-                                    <input type="text" value="€€€€" name="prezzo{{ i }}">
-                                </div>
-                                <div class="col-4"></div>
-                            </div>
-                        </div>
-
-                    {% endfor %}
-                    <div class="col-1"></div>
-
-
-                </div>
-                <div class="row">
-                    <div class="col-5"></div>
-                    <div class="col-2">
-                        <input type="submit" value="Submit">
-                    </div>
-                    <div class="col-5"></div>
-                </div>
-            </form>
+<div id="target">
+    <form method="POST" action="{{ url_for('upload_info_file') }}">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <h3 style="text-transform: uppercase;">{{ brand }} / {{ album }}</h3>
+                <input class="hidden" type="text" value="{{ brand }}" name="brand">
+                <input class="hidden" type="text" value="{{ album }}" name="album">
+            </div>
+            <div class="col-4"></div>
         </div>
-    </div>
-{% endblock %}
+        <div class="row">
+            {% for i in nomi_file %}
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-4"></div>
+                        <div class="col-8">
+                            <img height="200px" width="200px" src="{{ url_for("static",filename=i) }}">
+                            <input class="hidden" type="text" name="nome_file" value="{{ i }}">
+                        </div>
+                        <div class="col-0"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4"></div>
+                        <div class="col-4">
+                            <h4>Codice id</h4>
+                            <input type="text" name="codice_id{{ i }}">
+                        </div>
+                        <div class="col-4"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4"></div>
+                        <div class="col-4">
+                            <h4>Prezzo</h4>
+                            <input type="text" value="€€€€" name="prezzo{{ i }}">
+                        </div>
+                        <div class="col-4"></div>
+                    </div>
+                </div>
+
+            {% endfor %}
+            <div class="col-1"></div>
+
+
+        </div>
+        <div class="row">
+            <div class="col-5"></div>
+            <div class="col-2">
+                <input type="submit" value="Submit">
+            </div>
+            <div class="col-5"></div>
+        </div>
+    </form>
+
+</div>

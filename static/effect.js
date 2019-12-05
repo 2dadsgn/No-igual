@@ -1,7 +1,9 @@
 // JavaScript Document
+/*
 var array = [["clienti", "sezione-clienti"], ["ordini", "sezione-ordini"], ["account", "sezione-account"], ["espositore", "sezione-espositore"], ["agg-cliente", "sezione-add-clienti"], ["crea-ordine", "sezione-crea-ordine"]];
 
-/*event listeners*/
+
+//event listener on ...
 document.getElementById("clienti").addEventListener("click", function () {
     highlight("clienti");
 });
@@ -36,7 +38,7 @@ document.getElementById("exit").addEventListener("click", function () {
     menu_close();
 });
 
-/*funzione per effetto evidenziatore menu*/
+//funzione per effetto evidenziatore menu
 function highlight(id) {
     var c, i;
     for (c = 0; c < array.length; c++) {
@@ -55,7 +57,7 @@ function highlight(id) {
 
     }
 }
-
+*/
 /*funzione apertura menu*/
 function menu_open() {
     document.getElementById("exit").style.display = "block";
@@ -98,7 +100,7 @@ function rifoca() {
 
 /* AJAX REQUEST for albums*/
 function http(url, target, value) {
-    console.log("GET me " + url + " to " + target);
+    console.log("GET me " + url + " to " + target + " " + value);
     const Http = new XMLHttpRequest();
     var qui = document.getElementById(target);
     Http.onreadystatechange = function () {
@@ -107,9 +109,45 @@ function http(url, target, value) {
         } else {
             qui.innerHTML = this.status;
         }
-    }
-
-    Http.open("POST", url);
+    };
+    console.log(value)
+    Http.open("POST", url, true);
     Http.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
     Http.send("value=" + value);
 }
+
+/* AJAX REQUEST for albums*/
+function http_cart(url) {
+    let codice = document.getElementById("codice").innerHTML;
+    let quantita = document.getElementById("quantita").innerHTML;
+    let prezzo = document.getElementById("prezzo").innerHTML;
+    console.log(codice.toString());
+    let data = {
+        "codice": codice,
+        "prezzo": prezzo,
+        "quantita": quantita,
+
+    }
+    prezzo = prezzo.replace(",", ".")
+    data
+    const Http = new XMLHttpRequest();
+    var qui = document.getElementById("cart");
+
+    Http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            qui.innerHTML = this.responseText;
+
+        } else {
+            qui.innerHTML = 0;
+        }
+
+    }
+    Http.open("POST", url, true);
+    Http.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    Http.send("data=" + codice);
+
+}
+
+//real ajax jquey
+
+

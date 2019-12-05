@@ -1,30 +1,8 @@
-{% extends "base.html" %}
-{% block body %}
-    <div class="container-fluid">
-        <nav>
-            <a>
-                <li class="menuli" id="clienti">Clienti</li>
-                <li class="menuli" id="ordini">Ordini</li>
-                <li class="menuli" id="espositore">Espositore</li>
-                <li class="menuli" id="account">Account</li>
-                </ol>
-                <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
-                     width="130" height="106" alt=""/>
-                <div class="menu-scomparsa" id="menu-scomp">
-                    <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
-                                          width="216" height="212" alt=""/></div>
-                    <div class="row">
-                        <ol class="ol-scomparsa">
-                            <li>Log Out</li>
-                        </ol>
-                    </div>
-                </div>
-                <div id="exit"></div>
-        </nav>
 
+<div id="target">
 
-        <!--SEZIONE CREAZIONE ORDINE-->
-        <form id="sezione-crea-ordine" style="left: 0;" method="post" action="{{ url_for('adding_orders') }}">
+    <!--SEZIONE modifica ORDINE-->
+    <div id="sezione-crea-ordine" style="left: 0;">
             <div class="col-md-8 box-gray-ordini-crea">
                 <div class="row">
                     <div class="col-12">
@@ -33,8 +11,8 @@
                         <input class="col-6 hidden" name="ordine_numero" type="text"
                                value="{{ ordine["ordine_numero"] }}">
 
-                        <h4 class="col-6">Nome Cliente </h4>
-                        <input class="col-6" name="nome_cliente" type="text" value="">
+                        <h4 class="col-6">Ragione sociale </h4>
+                        <input class="col-6" name="nome_cliente" type="text" value="{{ ordine["ragione_sociale"] }}">
 
                         <h4 class="col-6">Codice Cliente:</h4>
                         <input type="text" name="codice_cliente" class="col-6" value="{{ ordine["codice_cliente"] }}">
@@ -48,20 +26,18 @@
 
                     <div class="col-12">
                         <h4 class="col-6">Codici articoli:</h4>
-                        <p class="col-6">prova</p>
-                        <p class="col-6"></p>
-                        <p class="col-6">prova</p>
+                        {% for i in ordine["carrello"] %}
+                            <p class="col-2">{{ i }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
             <div class="row div-tasti">
-                <a href="{{ url_for("home") }}"> <input class="tasto-canc" id="indietro-ordine" type="button"
-                                                        value="annulla"> </a>
-                <button class="tasto-ins" type="submit">conferma</button>
+                <button class="tasto-ins" onclick="http('/routing','target','ordini')">annulla</button>
+                <button class="tasto-ins" onclick="http('/routing','target','!modifica_ordine')">conferma</button>
             </div>
-        </form>
-        <!--FINE SEZIONE CREAZIONE ORDINE-->
-
-
     </div>
-{% endblock %}
+    <!--FINE SEZIONE modifica ORDINE-->
+
+
+</div>
