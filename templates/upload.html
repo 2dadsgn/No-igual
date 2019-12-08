@@ -1,13 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Oxygen&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|EB+Garamond:400,400i,500,500i,600,600i,700,700i,800,800i|Libre+Caslon+Display|Titillium+Web:200,200i,300,300i,400,400i,600,600i,700,700i,900&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>No Igual</title>
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename = 'bootstrap-4.3.1.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename = 'main.css') }}" rel="stylesheet">
+
+</head>
+<body>
+<div class="container-fluid">
+    <nav id="nav">
+        <ol>
+            <div class="menuli" id="cart" onclick="http('/routing','target','crea_ordine')">€</div>
+            <li class="menuli" id="clienti" onclick="http('/routing','target','clienti')">Clienti</li>
+            <li class="menuli" id="ordini" onclick="http('/routing','target','ordini')">Ordini</li>
+            <li class="menuli" id="espositore" onclick="http('/routing','target','espositore')">Espositore</li>
+            <li class="menuli" id="account" onclick="http('/routing','target','account')">Account</li>
+        </ol>
+        <img id="hamburgher" class="img-menu" src="{{ url_for('static',filename='Artboard 8.png') }}"
+             width="130" height="106" alt=""/>
+        <div class="menu-scomparsa" id="menu-scomp">
+            <div class="row"><img id="img-close" src="{{ url_for('static',filename='Artboard 9.png') }}"
+                                  width="216" height="212" alt=""/></div>
+            <div class="row">
+                <ol class="ol-scomparsa">
+                    <li>Log Out</li>
+                </ol>
+            </div>
+        </div>
+        <div id="exit"></div>
+    </nav>
 <div id="target">
     <form method="POST" action="{{ url_for('upload_info_file') }}">
         <div class="row">
-            <div class="col-4"></div>
-            <div class="col-4">
-                <h3 style="text-transform: uppercase;">{{ brand }} / {{ album }}</h3>
+            <div class="col-2 col-md-2 col-lg-2"></div>
+            <div class="col-8 col-md-8 col-lg-8 ">
+                <h5 class="dritto" style="text-transform: uppercase;">{{ brand }} / {{ album }}</h5>
                 <input class="hidden" type="text" value="{{ brand }}" name="brand">
                 <input class="hidden" type="text" value="{{ album }}" name="album">
             </div>
-            <div class="col-4"></div>
+            <div class="col-2 col-md-2 col-lg-2"></div>
         </div>
         <div class="row">
             {% for i in nomi_file %}
@@ -24,8 +64,8 @@
                     <div class="row">
                         <div class="col-4"></div>
                         <div class="col-4">
-                            <h4>Codice id</h4>
-                            <input type="text" name="codice_id{{ i }}">
+                            <h4 class="dritto">Codice id</h4>
+                            <input style="text-align: center" class="dritto" type="text" name="codice_id{{ i }}">
                         </div>
                         <div class="col-4"></div>
                     </div>
@@ -33,8 +73,9 @@
                     <div class="row">
                         <div class="col-4"></div>
                         <div class="col-4">
-                            <h4>Prezzo</h4>
-                            <input type="text" value="€€€€" name="prezzo{{ i }}">
+                            <h4 class="dritto">Prezzo</h4>
+                            <input style="text-align: center" class="dritto" type="text" value="€€€€"
+                                   name="prezzo{{ i }}">
                         </div>
                         <div class="col-4"></div>
                     </div>
@@ -48,10 +89,23 @@
         <div class="row">
             <div class="col-5"></div>
             <div class="col-2">
-                <input type="submit" value="Submit">
+                <input style="color: green;" type="submit" value="Procedi!">
             </div>
             <div class="col-5"></div>
         </div>
     </form>
 
 </div>
+</div>
+
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="{{ url_for('static',filename='jquery-3.3.1.min.js') }}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{{ url_for('static',filename='popper.min.js') }}"></script>
+<script src="{{ url_for('static',filename='bootstrap-4.3.1.js') }}"></script>
+<script src="{{ url_for('static', filename = 'effect.js') }}"></script>
+
+
+</body>
+</html>

@@ -117,19 +117,17 @@ function http(url, target, value) {
 }
 
 /* AJAX REQUEST for albums*/
-function http_cart(url) {
-    let codice = document.getElementById("codice").innerHTML;
-    let quantita = document.getElementById("quantita").innerHTML;
-    let prezzo = document.getElementById("prezzo").innerHTML;
-    console.log(codice.toString());
-    let data = {
-        "codice": codice,
-        "prezzo": prezzo,
-        "quantita": quantita,
+function http_cart(url, codice) {
+    id_codice = '#' + codice + "quantita";
+    prezzo_codice = codice + "prezzo";
+    let quantita = $(id_codice).val();
+    let prezzo = document.getElementById(prezzo_codice).innerHTML;
+    prezzo = prezzo.replace(",", ".");
 
-    }
-    prezzo = prezzo.replace(",", ".")
-    data
+    let data = [codice, quantita, prezzo];
+
+
+
     const Http = new XMLHttpRequest();
     var qui = document.getElementById("cart");
 
@@ -144,10 +142,7 @@ function http_cart(url) {
     }
     Http.open("POST", url, true);
     Http.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    Http.send("data=" + codice);
+    Http.send("data=" + data);
 
 }
-
-//real ajax jquey
-
 

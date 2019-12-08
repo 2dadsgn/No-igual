@@ -19,27 +19,42 @@
                         </div>
                         <div class="col-4"></div>
                     </div>
-                    <div class="row" style="width: 100%">
+                    <div class="row" style="width: 100%;padding: 1em;">
                         {% for c in album[0][i] %}
+                            <!--iterazione per creare griglia oggetti -->
                             <div id="1" class="col-10 col-md-3 col-lg-3" style="margin-bottom: 50px;width: 100%">
+                                <!--img dell oggetto -->
                                 <img style="width: 100%" class="col-12" height="200px" width="200px"
                                      src="{{ url_for("static",filename=c["immagine"]) }}"
                                      onclick="http('/view_img','target','{{ c["immagine"] }}')">
 
                                 <input class="hidden" type="text" name="nome_file" value="{{ i }}">
+                                <!-- codice -->
+                                <div class="row">
+                                    <h2 style="display:inline;text-align: right" class="col-6">COD:</h2>
+                                    <h2 style="display:inline;text-align: left" id="codice"
+                                        class="col-6">{{ c["codice"] }}</h2>
+                                </div>
 
-                                <h2 id="codice" class="col-12">COD {{ c["codice"] }}</h2>
+
+                                <!-- prezzo-->
+                                <div class="row">
+                                    <h2 style="display:inline;text-align: right" class="col-6">Prezzo:</h2>
+                                    <h2 style="display:inline;text-align: left"
+                                        id="{{ c["codice"] }}prezzo" class="col-6">{{ c["prezzo"] }}</h2>
+                                </div>
 
 
-                                <h2 id="prezzo" class="col-12">prezzo:{{ c["prezzo"] }}</h2>
                                 <div class="col-12">
                                     <div class="row" style="margin: 10px 0 20px 0;">
+                                        <!--tasto per aggiungere al carrello -->
 
-                                        <button class="dritto" onclick="http_cart('/add_to_cart')">
+                                        <button class="dritto" onclick="http_cart('/add_to_cart','{{ c["codice"] }}')">
                                             Aggiungi all'ordine
                                         </button>
-                                        <input id="quantita" style="text-align: center;margin-top: 20px" class="dritto"
-                                               name="quantity" value="1">
+                                        <!-- input quantita -->
+                                        <input style="text-align: center" class="dritto" id="{{ c["codice"] }}quantita"
+                                               type="number" value="1">
 
 
                                     </div>
@@ -48,6 +63,7 @@
                                 <div class="col-12">
                                     <div class="row">
                                         <div class="col-3"></div>
+                                        <!--tasto per rimuovere dal carrello -->
                                         <button class="col-6"
                                                 onclick="http_cart('/remove_from_cart','{{ c["codice"] }}','{{ c["prezzo"] }}')">
                                             Rimuovi

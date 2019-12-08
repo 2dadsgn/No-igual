@@ -6,14 +6,15 @@
 
             <div class="row">
                 {% for i in nomi_brand %}
-                    <div class="col-10 col-md-3 col-lg-3">
+                    <div class="col-10 col-md-4 col-lg-3">
 
                         <form action="{{ url_for("mostra_espositore") }}" method="post">
-                            <h2>{{ i["brand"] }}</h2>
+                            <h2 class="dritto">{{ i["brand"] }}</h2>
 
-                            <img id="imgclick" onclick="http('/espositore','target','{{ i["brand"] }}')" class="img-ogg"
-                                 src="{{ url_for('static',filename='140X140.gif') }}" width="100%"
-                                 height="100%"
+                            <img id="imgclick" onclick="http('/espositore','target','{{ i["brand"] }}')"
+                                 class="dritto img-ogg"
+                                 src="{{ url_for('static',filename='140X140.gif') }}" width="90%"
+                                 height="90%"
                                  alt=""/>
                         </form>
                     </div>

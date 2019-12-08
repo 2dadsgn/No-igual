@@ -16,6 +16,14 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/db-noigual"
 mongo = PyMongo(app)
 app.secret_key = b'_52ksaLFwerWWrcdesal'
 
+app.config['MAIL_SERVER'] = 'out.virgilio.it'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'lubrano.biagio@virgilio.it'
+app.config['MAIL_PASSWORD'] = 'prova'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
 
 
 app.host = '0.0.0.0'
@@ -90,10 +98,10 @@ def routing():
             errore = "in clienti"
             return render_template("clienti.html", clienti=arrayclienti)
 
-        elif request.form["value"] == "aggiungi_cliente":
+        elif request.form["value"] == "aggiungi_cliente" :
             return render_template("crea_cliente.html")
 
-        elif request.form["value"] == "ordini":
+        elif request.form["value"] == "ordini" :
             errore = "in ordini"
             return render_template("ordini.html", ordini=ordini)
 
@@ -106,10 +114,10 @@ def routing():
 
         elif request.form["value"] == "upload":
             return render_template("upload.html")
-        # modifica ordine
+        #modifica ordine
         elif request.form["value"] == "modifica_ordine":
             return render_template("modify-order.html")
-        # crea ordine
+        #crea ordine
         elif request.form["value"] == "crea_ordine":
 
             return render_template("crea_ordine.html", clienti=arrayclienti, carrello=carrello, totale=spesa)
@@ -122,7 +130,7 @@ def routing():
 
         if frase == "null" and session["username"]:
             frase = "Benvenuto " + session["username"]
-        elif session["username"] == "" or session["username"] == None:
+        elif session["username"] == "" or session["username"] == None :
             render_template("home.html")
 
     return render_template("welcome.html", frase=frase, back_to=back_to)
@@ -157,6 +165,52 @@ def logging():  # admin/admin   agent/123     agent2/123
         else:
             errore = "password errata"
             return url_for("index", error_pass=errore)
+
+
+@app.route('/create_credentials', methods=["POST"])
+def create_credentials():
+    global frase, back_to
+    if request.form["tipo-azione"] == "nuovo-utente":
+        try:
+            mongo.db.utenti.insert({
+                "username": request.form["email"],
+                "password": 1  # generate the random password and send it to email address
+            })
+        except:
+            frase = "errore nella creazione nuovo utente"
+            back_to = "account"
+            return redirect(url_for("routing"))
+        frase = "creazione avvenuta con successo"
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+    else:
+        try:
+            mongo.db.utenti.update_one({
+                "username": request.form["email"]},
+                {"$set": {
+                    "password": 1  # generate a new password and send it by email
+                }})
+        except:
+
+            frase = "errore nella modifica utente"
+            back_to = "account"
+            return redirect(url_for("routing"))
+        frase = "modifica avvenuta con successo"
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+
+@app.route('/switch_modifica_crea', methods=["POST"])
+def switch_modifica_crea():
+    if request.form["value"] == "new-utente":
+        return ' <h4>Inserisci nuova email</h4> <input class="dritto" type="email" name="email" value="inserisci email">' + '<p>La password sarà generata automaticamente<br> e inviata via email</p>' + '<input class="dritto" type="submit" value="Procedi">'
+    else:
+        return '<h4 class="dritto">Inserisci vecchia email</h4><input class="dritto " type="email" name="vecchia-email" value="inserisci email"><h4>Inserisci nuova email</h4><input class="dritto" type="email" name="email" value="inserisci email"><p>La password sarà generata automaticamente<br> e inviata via email</p><input class="dritto" type="submit" value="Procedi">'
+
+
+
+
 
 
 @app.route('/adding_orders', methods=["POST"])
@@ -323,7 +377,7 @@ def upload_info_file():
 @app.route('/uploading', methods=['POST'])
 def upload_file():
     nomi_file.clear()  #pulisco array per evitare sovrapposizioni in upload successivi
-    if request.method == 'POST':
+    if request.method == 'POST' :
 
         file = request.files.getlist("file")
 
@@ -367,34 +421,46 @@ def view_img():
     global brand_attuale
     return render_template("view_img.html", url_foto=request.form["value"], brand_attuale=brand_attuale)
 
-
 @app.route("/add_to_cart", methods=["POST", "GET"])
 def add_to_cart():
     global carrello
     global spesa
     global quantity
 
-    print(request.form["data"])
-    return f"{spesa}"
+    # dati diviene un array
+    dati = request.form["data"].split(",")
+    carrello.append(dati[0])
+    quantity.append(dati[1])
 
+    prezzo = float(dati[2]) * int(dati[1])
+    spesa = spesa + prezzo
+    print(prezzo)
+
+    return f"{spesa}"
 
 @app.route("/remove_from_cart", methods=["POST", "GET"])
 def remove_from_cart():
     global carrello
     global spesa
+    global quantity
 
     # splitto la stringa in due  e assegno ad codice e prezzo
-    stringa = request.form["value"].split("$")
+    stringa = request.form["dati"].split(",")
     codice = stringa[0]
-    stringa_due = stringa[1].split("$$")
-    prezzo = float(stringa_due[0])
+    prezzo = float(stringa[2])
+
     if spesa > 0:
-        spesa = spesa - prezzo
-    for i in carrello:
-        if i == codice:
-            carrello.remove(i)
-            quantity.remove(i)
+        for i in range(0, len(carrello)):
+            if carrello[i] == codice:
+                prezzo_finale = quantity[i] * prezzo
+                quantity.pop(i)
+    carrello.remove(codice)
+
+    spesa = spesa - prezzo_finale
+
     print(carrello)
+
+
     return f"{spesa}"
 
 

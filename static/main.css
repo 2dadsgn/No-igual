@@ -53,6 +53,16 @@ body {
     -ms-transition-timing-function: ease-in-out;
 }
 
+input, select {
+    margin-bottom: 1.4em;
+}
+
+input {
+    color: rgba(0, 0, 0, 0.58);
+    font-size: 14px;
+    text-align: center;
+}
+
 
 
 /*-----------paragraph and header------------------*/
@@ -91,7 +101,7 @@ h4 {
 }
 
 h5 {
-    font-size: 2.0em;
+    font-size: 1.8em;
     font-family: 'EB Garamond', serif;
     font-weight: 200;
     letter-spacing: 0.05em;
@@ -99,9 +109,7 @@ h5 {
     margin-bottom: 0.5em;
 }
 
-input, select {
-    margin-bottom: 1.4em;
-}
+
 
 .titolo {
     font-size: 3em;
@@ -130,7 +138,7 @@ ol {
     display: inline;
     float: left;
     list-style-type: none;
-    margin: 0 auto 0 12vw;
+    margin: 0 auto 0 16vw;
 
 }
 
@@ -229,6 +237,18 @@ li {
 
 /*tablet*/
 @media (max-width: 1280px) {
+    nav {
+        margin: 0 0 0 0;
+    }
+
+    li {
+        width: 90px;
+        margin: 0.2em !important;
+    }
+
+    ol {
+        margin-left: 1.5em !important;
+    }
 }
 
 /*laptop*/
@@ -238,9 +258,9 @@ li {
 /*--------------------------------------------------*/
 /*-----------------------ESPOSITORE------------------*/
 #sezione-espositore {
-    position: relative;
-    top: 0em;
-    left: 0em;
+
+    top: 1em;
+    left: auto;
     z-index: 2;
     height: 99vh;
     width: 99vw;
@@ -249,13 +269,13 @@ li {
     transition-duration: 800ms;
     overflow-y: hidden;
     overflow-x: hidden;
-    padding: 10vh 10vw 10vh 10vw;
+    padding: 0;
 }
 
 .img-ogg {
     width: 15em;
     height: 15em;
-    margin: 0;
+    margin: auto;
     padding: 0;
     z-index: inherit;
 }
@@ -272,8 +292,9 @@ li {
 @media (max-width: 1280px) {
     #sezione-espositore {
         position: fixed;
-        top: 10em;
-        left: 1vw;
+        top: 4em;
+        left: auto;
+        display: block;
 
     }
 }
@@ -297,26 +318,29 @@ li {
 
 .box-gray-account {
     background-color: hsla(0, 0%, 38%, 0.20);
-    width: 95vw;
     height: 100%;
-    margin: auto;
+    margin: 1em auto;
     border-radius: 10px;
     color: black;
     padding: 1em;
-    font-family: 'Oxygen', sans-serif;
     z-index: 2;
 }
 
-.box-gray-account input {
-    margin-top: 0.5em;
-    z-index: 2;
-
+#sezione-account input {
+    margin-bottom: 30px;
+    text-align: center;
 }
 
-.box-gray-account button {
-    margin-top: -2em;
-    z-index: 2;
+#sezione-account p {
+    color: red;
+}
 
+#sezione-account h4 {
+    margin-bottom: 10px;
+}
+
+#sezione-account h5 {
+    margin-bottom: 40px;
 }
 
 /*mobile*/
@@ -342,7 +366,7 @@ li {
 #sezione-clienti {
     position: absolute;
     top: 20vh;
-    left: 0em;
+    left: auto;
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
@@ -400,7 +424,7 @@ li {
 }
 
 .div-tasti {
-    margin: 1em 0 0 40vw;
+    margin-top: 1em;
     z-index: 2;
 }
 
@@ -453,16 +477,28 @@ li {
 #sezione-crea-ordine {
     position: fixed;
     top: 10em;
-    left: 0em;
+    left: auto;
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
     z-index: 2;
 }
 
+#sezione-ordini h4 {
+    text-align: right;
+}
+
+#sezione-ordini p {
+    text-align: left;
+}
+
 #crea-ordine {
     margin-bottom: 2em;
     z-index: 2;
+}
+
+#crea-ordine h2, h4, p {
+    text-align: center;
 }
 
 .box-gray-ordini {
