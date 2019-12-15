@@ -1,7 +1,9 @@
 import os
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_pymongo import PyMongo
+from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
+from random_password import random_password
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -12,8 +14,10 @@ app = Flask(__name__)
 # config for the upload folder
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app.config["MONGO_URI"] = "mongodb://localhost:27017/db-noigual"
-mongo = PyMongo(app)
+# app.config["MONGO_URI"] = "mongodb://localhost:27017/db-noigual"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///noigual.sqlite3'
+# mongo = PyMongo(app)
+db = SQLAlchemy(app)
 app.secret_key = b'_52ksaLFwerWWrcdesal'
 
 app.config['MAIL_SERVER'] = 'out.virgilio.it'
@@ -23,6 +27,105 @@ app.config['MAIL_PASSWORD'] = 'prova'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
+
+
+# DB models###############
+
+# utenti-------------
+class utenti(db.Model):
+    email = db.Column(db.String(20), primary_key=True, nullable=False)
+    password = db.Column(db.String(12), nullable=False)
+    poteri = db.Column(db.Integer, nullable=False, default=0)
+    ordini = db.relationship('ordini', backref='utente', lazy=True)
+
+
+def __init__(self, email, password, poteri):
+    self.email = email
+    self.password = password
+    self.poteri = poteri
+
+
+# gioielli------------
+class gioielli(db.Model):
+    brand = db.Column(db.String(30), nullable=False)
+    categoria = db.Column(db.String(20), nullable=False)
+    immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
+    prezzo = db.Column(db.Float, nullable=False)
+    codice = db.Column(db.String(30), primary_key=True)
+
+
+def __init__(self, brand, categoria, immagine, prezzo, codice):
+    self.brand = brand
+    self.categoria = categoria
+    self.immagine = immagine
+    self.prezzo = prezzo
+    self.codice = codice
+
+
+# -------------------------
+
+# ordini------------
+class ordini(db.Model):
+    author = db.Column(db.String(), db.ForeignKey('utenti.email'), nullable=False)
+    codice = db.Column(db.String(20), primary_key=True)
+    data = db.Column(db.Date, nullable=False)
+    totale = db.Column(db.Float, unique=True, nullable=False)
+    cliente = db.Column(db.String(), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
+    pagamento = db.Column(db.String(20), nullable=False)
+    carrello = db.relationship('gioielli', backref='ordine', lazy=True)
+
+
+def __init__(self, author, codice, data, totale, cliente, pagamento, carrello):
+    self.author = author
+    self.codice = codice
+    self.datat = data
+    self.totale = totale
+    self.cliente = cliente
+    self.pagamento = pagamento
+    self.carrello = carrello
+
+
+# -------------------------
+
+
+# clienti------------
+class clienti(db.Model):
+    nome = db.Column(db.String(10), nullable=False)
+    cognnome = db.Column(db.String(15), nullable=False)
+    via = db.Column(db.String(30), nullable=False)
+    cap = db.Column(db.Integer, nullable=False)
+    citta = db.Column(db.String(20), nullable=False)
+    provincia = db.Column(db.String(4), nullable=False)
+    partita_iva = db.Column(db.String(30), nullable=False, unique=True)
+    codice_fiscale = db.Column(db.String(40), primary_key=True)
+    email = db.Column(db.String(30), nullable=False)
+    banca = db.Column(db.String(30), nullable=False)
+    iban = db.Column(db.String(30), nullable=False)
+    ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
+    ordini = db.relationship('ordini', backref='cliente', lazy=True)
+
+
+def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, banca, iban,
+             ragione_sociale, ordini):
+    self.nome = nome
+    self.cognome = cognome
+    self.via = via
+    self.cap = cap
+    self.citta = citta
+    self.provincia = provincia
+    self.partita_iva = partita_iva
+    self.codice_fiscale = codice_fiscale
+    self.email = email
+    self.banca = banca
+    self.iban = iban
+    self.ragione_sociale = ragione_sociale
+    self.ordini = ordini
+
+
+# -------------------------
+
+
+#########################
 
 
 
@@ -36,7 +139,7 @@ codice_clienti = 0
 nomi_file = []
 
 # global spesa
-spesa = 0
+spesa = 0.0
 
 # global brand in visualizzazione
 brand_attuale = "none"
@@ -61,15 +164,16 @@ def index():
 def routing():
     global indice_ordini
     try:
-        # dictionary per i clienti
-        brand = mongo.db.brand.find()
+        # lista di brand
+        gioiellii = gioielli.query.all()
         nomi_brand = []
-        for i in brand:
-            nomi_brand.append(i)
-        clienti = mongo.db.clienti.find().sort("ragione_sociale", 1)
+        for i in gioiellii:
+            nomi_brand.append(i.brand)
+        # lista di clienti
+        customers = clienti.query.all()
         arrayclienti = []
-        for x in clienti:
-            arrayclienti.append(x)
+        for x in customers:
+            arrayclienti.append(x.ragione_sociale)
 
         # ottengo cursore da mongo se admin tutti ordini
         # se agent solo ordini effettuati
@@ -100,6 +204,8 @@ def routing():
 
         elif request.form["value"] == "aggiungi_cliente" :
             return render_template("crea_cliente.html")
+        elif request.form["value"] == "rimuovi_cliente":
+            return render_template("elimina_cliente.html", clienti=arrayclienti)
 
         elif request.form["value"] == "ordini" :
             errore = "in ordini"
@@ -136,22 +242,37 @@ def routing():
     return render_template("welcome.html", frase=frase, back_to=back_to)
 
 
+def sending_email(destinatario):
+    token = random_password(length=6,
+                            characters=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'a', 'b', 'c', 'd', 'e',
+                                        'f'
+                                , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
+                                , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+
+    msg = Message('Accesso credenziali', sender='No Igual gioielli', recipients=destinatario)
+    msg.body = f"ciao  {destinatario} , conserva queste informazioni accuratamente,ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No Igual gioielli, questa è la tua password --> {token} <--  "
+    print(msg)
+    try:
+        mail.send(msg)
+    except:
+        print("message password not sent")
+        return "errore"
+    return token
+
 @app.route('/logging', methods=["POST"])
 def logging():  # admin/admin   agent/123     agent2/123
     username = request.form["username"]
     password = request.form["password"]
 
-    cursore = mongo.db.utenti.find_one({'username': username})
+    cursore = utenti.query.filter_by(email=username).first()
 
     if cursore == None:
         errore = "utente non  registrato"
-        # ELIMINARE RIGA BELOW
-        # mongo.db.utenti.insert({"username": username, "password": generate_password_hash(password), "admin": "yes"})
         return render_template('home.html', error_name=errore)
 
     else:
-        if check_password_hash(cursore["password"], password):
-            if cursore["admin"] == "yes":
+        if check_password_hash(cursore.password, password):
+            if cursore.poteri == 1:
                 tipo_utente = "admin"
                 session["type"] = "admin"
                 session["username"] = request.form["username"]
@@ -170,12 +291,18 @@ def logging():  # admin/admin   agent/123     agent2/123
 @app.route('/create_credentials', methods=["POST"])
 def create_credentials():
     global frase, back_to
+    #crea utente
     if request.form["tipo-azione"] == "nuovo-utente":
         try:
-            mongo.db.utenti.insert({
-                "username": request.form["email"],
-                "password": 1  # generate the random password and send it to email address
-            })
+            password_generata = sending_email(request.form["email"])
+            if password_generata == "errore":
+                frase = "errore nell'invio del messaggio password email"
+                back_to = "account"
+                return redirect(url_for("routing"))
+            new_utente = utenti(request.form["email"], password_generata)
+            db.session.add(new_utente)
+            db.session.commit()
+
         except:
             frase = "errore nella creazione nuovo utente"
             back_to = "account"
@@ -183,16 +310,19 @@ def create_credentials():
         frase = "creazione avvenuta con successo"
         back_to = "account"
         return redirect(url_for("routing"))
-
+    #aggiorna password utente
     else:
         try:
-            mongo.db.utenti.update_one({
-                "username": request.form["email"]},
-                {"$set": {
-                    "password": 1  # generate a new password and send it by email
-                }})
+            password_generata = sending_email(request.form["email"])
+            if password_generata == "errore":
+                frase = "errore nell'invio del messaggio password email"
+                back_to = "account"
+                return redirect(url_for("routing"))
+            else:
+                user = utenti.query.filter_by(request.form["email"]).first()
+                user.password = password_generata
+                db.session.commit()
         except:
-
             frase = "errore nella modifica utente"
             back_to = "account"
             return redirect(url_for("routing"))
@@ -324,6 +454,16 @@ def adding_customer():
     return render_template("welcome.html", frase="Cliente aggiunto", back_to="clienti")
 
 
+# rimozione cliente nel db
+@app.route('/removing_customer', methods=['POST'])
+def removing_customer():
+    global codice_clienti
+    mongo.db.clienti.delete_one({
+        "ragione_sociale": request.form["cliente-da-eliminare"]
+    })
+    return render_template("welcome.html", frase="Cliente rimosso", back_to="clienti")
+
+
 
 
 def allowed_file(filename):
@@ -333,11 +473,15 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
-    brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
+    try:
+        brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
+    except:
+        print("brand  non trovato")
 
     espositore = []
     categorie = []
-    # ciclo for to create array espositore and dictionary within inside
+    iteratore = []
+    # preparo dati in un vettore da inserire in DB
     for i in nomi_file:
         espo = {"immagine": i,
                 "codice": request.form[f"codice_id{i}"],
@@ -349,6 +493,9 @@ def upload_info_file():
 
     for i in brand_cursore:
         t = t + 1
+    # la collezione brand ha un campo stringa brand
+    # un campo categorie che è un vettore con tutti i nomi degli album
+    #e un campo espositore che ha il campo con nome categoria ed è un vettore con tutte le info sui file
 
     if t == 0:
         print("insert")
@@ -360,12 +507,20 @@ def upload_info_file():
             f"{request.form['album']}": espositore
         })
     else:
-        print("update")
-        brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
-        for i in brand_cursore:
-            print(i)
 
-        # qui problema con cursore pymongo????
+        # ci sono due casi di update
+        # primo in cui il brand esiste già ma si sta creando una nuova categoria
+        #secondo in cui la categoria anche esiste già e si vuole aggiungere/ sostituire elementi
+
+        print("update")
+
+        # caso in cui esiste brand e anche categoria
+        try:
+            print(brand_cursore)
+
+        except:
+            print("errore in fetching the album, so it doesnt exist already")
+
 
         mongo.db.brand.update_one({"brand": request.form["brand"]},
                                   {"$set": {"categorie": categorie,
@@ -432,10 +587,9 @@ def add_to_cart():
     carrello.append(dati[0])
     quantity.append(dati[1])
 
-    prezzo = float(dati[2]) * int(dati[1])
-    spesa = spesa + prezzo
-    print(prezzo)
-
+    prezzo = float(dati[2]) * (float(dati[1]))
+    spesa = float("{0:.2f}".format(spesa + prezzo))
+    print(spesa)
     return f"{spesa}"
 
 @app.route("/remove_from_cart", methods=["POST", "GET"])
@@ -445,21 +599,20 @@ def remove_from_cart():
     global quantity
 
     # splitto la stringa in due  e assegno ad codice e prezzo
-    stringa = request.form["dati"].split(",")
+    stringa = request.form["data"].split(",")
+
     codice = stringa[0]
     prezzo = float(stringa[2])
 
-    if spesa > 0:
+    if spesa > 0 :
         for i in range(0, len(carrello)):
             if carrello[i] == codice:
-                prezzo_finale = quantity[i] * prezzo
+                prezzo_finale = float(quantity[i]) * prezzo
                 quantity.pop(i)
-    carrello.remove(codice)
-
-    spesa = spesa - prezzo_finale
-
-    print(carrello)
-
+                break
+    if carrello[i] == codice:
+        carrello.remove(codice)
+        spesa = round(float(spesa - prezzo_finale),2)
 
     return f"{spesa}"
 

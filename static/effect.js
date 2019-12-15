@@ -118,6 +118,11 @@ function http(url, target, value) {
 
 /* AJAX REQUEST for albums*/
 function http_cart(url, codice) {
+    if (url == "/add_to_cart") {
+        document.getElementById(codice + "radio").checked = true;
+    } else {
+        document.getElementById(codice + "radio").checked = false;
+    }
     id_codice = '#' + codice + "quantita";
     prezzo_codice = codice + "prezzo";
     let quantita = $(id_codice).val();

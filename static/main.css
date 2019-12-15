@@ -231,7 +231,18 @@ li {
 /*mobile*/
 @media (max-width: 576px) {
     nav {
-        display: none;
+        margin-left: -20vw !important;
+        margin-top: -5px !important;
+
+    }
+
+    li {
+        width: 10px;
+        margin: 0.2em !important;
+    }
+
+    ol {
+        margin-left: -10em !important;
     }
 }
 
@@ -258,17 +269,14 @@ li {
 /*--------------------------------------------------*/
 /*-----------------------ESPOSITORE------------------*/
 #sezione-espositore {
-
     top: 1em;
     left: auto;
     z-index: 2;
-    height: 99vh;
+    height: 100%;
     width: 99vw;
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
-    overflow-y: hidden;
-    overflow-x: hidden;
     padding: 0;
 }
 
@@ -284,8 +292,17 @@ li {
     margin: auto;
 }
 
+#sezione-espositore button {
+    text-align: center;
+    padding: 5px;
+}
+
 /*mobile*/
 @media (max-width: 576px) {
+    #sezione-espositore {
+        margin-top: 15vh;
+        padding-left: 18vw;
+    }
 }
 
 /*tablet*/
@@ -294,7 +311,8 @@ li {
         position: fixed;
         top: 4em;
         left: auto;
-        display: block;
+        right: auto;
+        display: inline;
 
     }
 }

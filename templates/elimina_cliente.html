@@ -1,0 +1,21 @@
+<div id="target">
+    <!--SEZIONE aggiunta cliente-->
+    <div class="dritto" id="sezione-remove-clienti">
+        <form method="post" action="{{ url_for('removing_customer') }}">
+            <h5>Rimozione cliente</h5>
+            <h4>Seleziona il cliente</h4>
+            <select class="dritto" name="cliente-da-eliminare">
+                <option value="seleziona-cliente">selezione cliente</option>
+                {% for i in clienti %}
+                    <option value="{{ i["ragione_sociale"] }}">{{ i["ragione_sociale"] }}</option>
+                {% endfor %}
+            </select>
+            <input style="margin-top: 20px" class="dritto" type="submit" value="Elimina">
+
+        </form>
+    </div>
+    <!--FINE SEZIONE aggiunta CLIENTI-->
+
+</div>
+
+

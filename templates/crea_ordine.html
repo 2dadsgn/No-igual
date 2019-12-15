@@ -1,0 +1,90 @@
+<div id="target">
+    <!--SEZIONE CREAZIONE ORDINE-->
+    <form id="sezione-crea-ordine" method="POST" action="{{ url_for('adding_orders') }}">
+        <div class="col-md-8 box-gray-ordini-crea">
+            <!-- qui input per far partire codice per nuovo inserimento-->
+            <input class="hidden" name="tipo" value="new" type="text">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="row">
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                        <div class="col-4 col-md-4 col-lg-4">
+
+                            <h4 class="dritto">Cliente </h4>
+
+                        </div>
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                        <div class="col-4 col-md-4 col-lg-4">
+                            <select class="dritto" name="ragione_sociale">
+                                {% if clienti %}
+                                    {% for d in clienti %}
+                                        <option value="{{ d["ragione_sociale"] }}">{{ d["ragione_sociale"] }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="empty"></option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                        <div class="col-4 col-md-4 col-lg-4">
+                            <h4 class=" dritto">Pagamento</h4>
+                        </div>
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                        <div class="col-4 col-md-4 col-lg-4">
+                            <select class="dritto" name="pagamento">
+                                <option value="riba">RIBA</option>
+                                <option value="rid">RID</option>
+                                <option value="rimessa diretta">Rimessa diretta</option>
+                                <option value="contrassegno">Contrassegno</option>
+                                <option value="bonifico">Bonifico</option>
+                                <option value="assegno">Assegno</option>
+                            </select>
+
+                        </div>
+                        <div class="col-4 col-md-4 col-lg-4"></div>
+                    </div>
+
+                    <h4 class=" dritto col-6">Data:</h4>
+                    <input type="date" name="data" class="dritto ">
+                </div>
+            </div>
+
+            <div class="row">
+                <h4 class=" dritto col-12">Codici articoli:</h4>
+                {% for i in carrello %}
+                    <p class="col-2">{{ i }}</p>
+                {% endfor %}
+            </div>
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <h4 style="color: green;font-weight: bold;font-weight: 16px;margin-top: 40px;">Totale
+                        = {{ totale }}</h4>
+                </div>
+                <div class="col-4"></div>
+
+            </div>
+
+        </div>
+        <div class="row div-tasti">
+            <div class="col-4"></div>
+            <button class="col-2 tasto-canc" id="indietro-ordine" onclick="http('/routing','target','ordini')">
+                indietro
+            </button>
+            <button class="col-2 tasto-ins" type="submit">crea</button>
+            <div class="col-4"></div>
+        </div>
+    </form>
+    <!--FINE SEZIONE CREAZIONE ORDINE-->
+</div>
+
