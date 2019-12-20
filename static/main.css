@@ -5,6 +5,10 @@ body {
     font-size: 15px;
 }
 
+
+#login input {
+    width: 200px;
+}
 .dritto {
     display: block;
     margin: auto;

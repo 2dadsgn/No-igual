@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from random_password import random_password
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/static'
@@ -38,11 +38,10 @@ class Utenti(db.Model):
     poteri = db.Column(db.Integer, nullable=False, default=0)
     ordini = db.relationship('Ordini', backref='utente', lazy=True)
 
-
-def __init__(self, email, password, poteri):
-    self.email = email
-    self.password = password
-    self.poteri = poteri
+    def __init__(self, email, password, poteri):
+        self.email = email
+        self.password = password
+        self.poteri = poteri
 
 
 # gioielli------------
@@ -53,17 +52,12 @@ class Gioielli(db.Model):
     prezzo = db.Column(db.Float, nullable=False)
     codice = db.Column(db.String(30), primary_key=True)
 
-
-def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, ordine):
-    self.unicode = unicode
-    self.brand = brand
-    self.categoria = categoria
-    self.immagine = immagine
-    self.prezzo = prezzo
-    self.codice = codice
-    self.ordine = ordine
-
-
+    def __init__(self, brand, categoria, immagine, prezzo, codice):
+        self.brand = brand
+        self.categoria = categoria
+        self.immagine = immagine
+        self.prezzo = prezzo
+        self.codice = codice
 # -------------------------
 
 
@@ -77,17 +71,17 @@ class Ordini(db.Model):
     pagamento = db.Column(db.String(20), nullable=False)
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
-
-def __init__(self, author, data, totale, cliente, pagamento, carrello):
-    self.author = author
-    self.data = data
-    self.totale = totale
-    self.cliente = cliente
-    self.pagamento = pagamento
-    self.carrello = carrello
-
+    def __init__(self, author, data, totale, cliente, pagamento, carrello):
+        self.author = author
+        self.data = data
+        self.totale = totale
+        self.cliente = cliente
+        self.pagamento = pagamento
+        self.carrello = carrello
 
 # -------------------------
+
+
 # gioielli ordinati------------
 class Gioielli_Ordinati(db.Model):
     unicode = db.Column(db.Integer, primary_key=True)
@@ -98,16 +92,14 @@ class Gioielli_Ordinati(db.Model):
     codice = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
     codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
 
-
-def __init__(self, brand, categoria, immagine, prezzo, codice, codice_ordine):
-    self.brand = brand
-    self.categoria = categoria
-    self.immagine = immagine
-    self.prezzo = prezzo
-    self.codice = codice
-    self.codice_ordine = codice_ordine
-
-
+    def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, codice_ordine):
+        self.unicode = unicode
+        self.brand = brand
+        self.categoria = categoria
+        self.immagine = immagine
+        self.prezzo = prezzo
+        self.codice = codice
+        self.codice_ordine = codice_ordine
 # -------------------------
 
 
@@ -127,29 +119,27 @@ class Clienti(db.Model):
     banca = db.Column(db.String(30), nullable=False)
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
-    ordini = db.relationship('Ordini', backref='cliente', lazy=True)
+    ordini = db.relationship('Ordini', backref='ordinato_da', lazy=True)
 
-
-def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, codice_sdi, telefono,
-             banca, iban,
-             ragione_sociale, ordini):
-    self.nome = nome
-    self.cognome = cognome
-    self.via = via
-    self.cap = cap
-    self.citta = citta
-    self.provincia = provincia
-    self.partita_iva = partita_iva
-    self.codice_fiscale = codice_fiscale
-    self.email = email
-    self.codice_sdi = codice_sdi
-    self.telefono = telefono
-    self.banca = banca
-    self.iban = iban
-    self.ragione_sociale = ragione_sociale
-    self.ordini = ordini
-
-
+    def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, codice_sdi,
+                 telefono,
+                 banca, iban,
+                 ragione_sociale, ordini):
+        self.nome = nome
+        self.cognome = cognome
+        self.via = via
+        self.cap = cap
+        self.citta = citta
+        self.provincia = provincia
+        self.partita_iva = partita_iva
+        self.codice_fiscale = codice_fiscale
+        self.email = email
+        self.codice_sdi = codice_sdi
+        self.telefono = telefono
+        self.banca = banca
+        self.iban = iban
+        self.ragione_sociale = ragione_sociale
+        self.ordini = ordini
 # -------------------------
 
 
@@ -314,7 +304,7 @@ def logging():  # admin/admin   agent/123     agent2/123
                 return redirect(url_for("routing"))  # call the method home to load fresh data on access
         else:
             errore = "password errata"
-            return url_for("index", error_pass=errore)
+            return render_template('home.html', error_pass=errore)
 
 
 @app.route('/create_credentials', methods=["POST"])
@@ -328,7 +318,7 @@ def create_credentials():  #function per creare credenziali da pannello ADMIN
                 frase = "errore nell'invio del messaggio password email"
                 back_to = "account"
                 return redirect(url_for("routing"))
-            new_utente = Utenti(request.form["email"], password_generata)
+            new_utente = Utenti(request.form["email"], generate_password_hash(password_generata))
             db.session.add(new_utente)
             db.session.commit()
 
@@ -384,6 +374,7 @@ def adding_orders():
             result.pagamento = request.form["pagamento"]
             result.data = request.form["data"]
             result.cliente = cliente.codice_fiscale
+            db.session.commit()
 
             # non effettua update del carrello ma solo dati dal form
             # ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
@@ -401,6 +392,8 @@ def adding_orders():
             cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
             ordine = Ordini(session["username"], request.form["data"], spesa, cliente.codice_fiscale,
                             request.form["pagamento"])
+            db.session.add(ordine)
+            db.session.commit()
             error = "ordine aggiunto correttamente in adding_orders"
 
         except:
@@ -453,6 +446,8 @@ def adding_customer():
                        request.form["email"], request.form["codice_sdi"], request.form["telefono"],
                        request.form["banca"],
                        request.form["iban"])
+    db.session.add(customer)
+    db.session.commit()
 
     return render_template("welcome.html", frase="Cliente aggiunto", back_to="clienti")
 
@@ -460,10 +455,10 @@ def adding_customer():
 # rimozione cliente nel db
 @app.route('/removing_customer', methods=['POST'])
 def removing_customer():
-    global codice_clienti
-    mongo.db.clienti.delete_one({
-        "ragione_sociale": request.form["cliente-da-eliminare"]
-    })
+    retrieved = Clienti.query.filter_by(ragione_sociale=request.form["cliente-da-eliminare"]).first()
+    db.session.delete(retrieved)
+    db.session.commit()
+
     return render_template("welcome.html", frase="Cliente rimosso", back_to="clienti")
 
 
@@ -476,58 +471,12 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
-    try:
-        brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
-    except:
-        print("brand  non trovato")
 
-    espositore = []
-    categorie = []
-    iteratore = []
-    # preparo dati in un vettore da inserire in DB
     for i in nomi_file:
-        espo = {"immagine": i,
-                "codice": request.form[f"codice_id{i}"],
-                "prezzo": request.form[f"prezzo{i}"]}
-        espositore.append(espo.copy())
-        espo.clear()
-
-    t = 0
-
-    for i in brand_cursore:
-        t = t + 1
-    # la collezione brand ha un campo stringa brand
-    # un campo categorie che è un vettore con tutti i nomi degli album
-    #e un campo espositore che ha il campo con nome categoria ed è un vettore con tutte le info sui file
-
-    if t == 0:
-        print("insert")
-        categorie.append(f"{request.form['album']}")
-
-        mongo.db.brand.insert({
-            "brand": request.form["brand"],
-            "categorie": categorie,
-            f"{request.form['album']}": espositore
-        })
-    else:
-
-        # ci sono due casi di update
-        # primo in cui il brand esiste già ma si sta creando una nuova categoria
-        #secondo in cui la categoria anche esiste già e si vuole aggiungere/ sostituire elementi
-
-        print("update")
-
-        # caso in cui esiste brand e anche categoria
-        try:
-            print(brand_cursore)
-
-        except:
-            print("errore in fetching the album, so it doesnt exist already")
-
-
-        mongo.db.brand.update_one({"brand": request.form["brand"]},
-                                  {"$set": {"categorie": categorie,
-                                            f"{request.form['album']}": espositore}})
+        gioiello = Gioielli(request.form["brand"], request.form["album"], i, request.form[f"codice_id{i}"],
+                            request.form[f"prezzo{i}"])
+        db.session.add(gioiello)
+        db.session.commit()
 
     return redirect(url_for("routing"))
 
@@ -570,7 +519,7 @@ def mostra_espositore():
     global brand_attuale
 
     brand_attuale = request.form["value"]
-    brand = mongo.db.brand.find({"brand": request.form["value"]})
+    brand = Gioielli.query.filter_by(brand=request.form["value"])
     return render_template("album.html", album=brand)
 
 

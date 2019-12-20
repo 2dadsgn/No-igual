@@ -17,14 +17,31 @@
 <body>
     <div class="container-fluid">
         <form id="login" class="row" action="{{ url_for("logging") }}" method="post">
-            <h1 class="col-12 titolo" id="titolo-noigual">No Igual</h1>
-            <h1 class="col-12">Email</h1>
-            <input class="col-8 input-form" type="email" name="username" value="" style="text-align: center">
-            <p class="errrore">{{ error_name }}</p>
-            <h1 class="col-12">Password</h1>
-            <input class="col-8 input-form" type="password" name="password" value="" style="text-align: center">
-            <p class="errore">{{ error_pass }}</p>
-            <input class="col-6 login-tasto" type="submit" value="login">
+            <div class="col-12">
+                <h1 class="dritto titolo" id="titolo-noigual">No Igual</h1>
+            </div>
+            <div class="col-12">
+                <h1 class="dritto">Email</h1>
+            </div>
+            <div class="col-12">
+                <input class=" input-form" type="email" name="username" value="" style="text-align: center">
+            </div>
+            <div class="col-12">
+                <p style="color: red" class="errrore dritto">{{ error_name }}</p>
+            </div>
+            <div class="col-12">
+                <h1 class=" dritto">Password</h1>
+            </div>
+            <div class="col-12">
+                <input class=" input-form" type="password" name="password" value="" style="text-align: center">
+            </div>
+            <div class="col-12">
+                <p style="color: red" class="errrore dritto">{{ error_pass }}</p>
+            </div>
+            <div class="col-12">
+                <input class="col-6 login-tasto dritto" type="submit" value="login">
+            </div>
+
         </form>
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
