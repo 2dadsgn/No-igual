@@ -32,11 +32,11 @@ mail = Mail(app)
 # DB models###############
 
 # utenti-------------
-class utenti(db.Model):
+class Utenti(db.Model):
     email = db.Column(db.String(20), primary_key=True, nullable=False)
     password = db.Column(db.String(12), nullable=False)
     poteri = db.Column(db.Integer, nullable=False, default=0)
-    ordini = db.relationship('ordini', backref='utente', lazy=True)
+    ordini = db.relationship('Ordini', backref='utente', lazy=True)
 
 
 def __init__(self, email, password, poteri):
@@ -46,7 +46,7 @@ def __init__(self, email, password, poteri):
 
 
 # gioielli------------
-class gioielli(db.Model):
+class Gioielli(db.Model):
     brand = db.Column(db.String(30), nullable=False)
     categoria = db.Column(db.String(20), nullable=False)
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
@@ -54,31 +54,34 @@ class gioielli(db.Model):
     codice = db.Column(db.String(30), primary_key=True)
 
 
-def __init__(self, brand, categoria, immagine, prezzo, codice):
+def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, ordine):
+    self.unicode = unicode
     self.brand = brand
     self.categoria = categoria
     self.immagine = immagine
     self.prezzo = prezzo
     self.codice = codice
+    self.ordine = ordine
 
 
 # -------------------------
 
+
 # ordini------------
-class ordini(db.Model):
-    author = db.Column(db.String(), db.ForeignKey('utenti.email'), nullable=False)
-    codice = db.Column(db.String(20), primary_key=True)
+class Ordini(db.Model):
+    author = db.Column(db.String(30), db.ForeignKey('Utenti.email'), nullable=False)
+    codice = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False)
     totale = db.Column(db.Float, unique=True, nullable=False)
     cliente = db.Column(db.String(), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
     pagamento = db.Column(db.String(20), nullable=False)
-    carrello = db.relationship('gioielli', backref='ordine', lazy=True)
+    carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
 
 def __init__(self, author, codice, data, totale, cliente, pagamento, carrello):
     self.author = author
     self.codice = codice
-    self.datat = data
+    self.data = data
     self.totale = totale
     self.cliente = cliente
     self.pagamento = pagamento
@@ -86,10 +89,31 @@ def __init__(self, author, codice, data, totale, cliente, pagamento, carrello):
 
 
 # -------------------------
+# gioielli ordinati------------
+class Gioielli_Ordinati(db.Model):
+    unicode = db.Column(db.Integer, primary_key=True)
+    brand = db.Column(db.String(30), nullable=False)
+    categoria = db.Column(db.String(20), nullable=False)
+    immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
+    prezzo = db.Column(db.Float, nullable=False)
+    codice = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
+    codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
+
+
+def __init__(self, brand, categoria, immagine, prezzo, codice, codice_ordine):
+    self.brand = brand
+    self.categoria = categoria
+    self.immagine = immagine
+    self.prezzo = prezzo
+    self.codice = codice
+    self.codice_ordine = codice_ordine
+
+
+# -------------------------
 
 
 # clienti------------
-class clienti(db.Model):
+class Clienti(db.Model):
     nome = db.Column(db.String(10), nullable=False)
     cognnome = db.Column(db.String(15), nullable=False)
     via = db.Column(db.String(30), nullable=False)
@@ -102,7 +126,7 @@ class clienti(db.Model):
     banca = db.Column(db.String(30), nullable=False)
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
-    ordini = db.relationship('ordini', backref='cliente', lazy=True)
+    ordini = db.relationship('Ordini', backref='cliente', lazy=True)
 
 
 def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, banca, iban,
@@ -132,7 +156,7 @@ def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codic
 app.host = '0.0.0.0'
 
 # global orders index
-indice_ordini = 0
+# indice_ordini = 0
 # global clients code
 codice_clienti = 0
 # nomifile global
@@ -165,33 +189,33 @@ def routing():
     global indice_ordini
     try:
         # lista di brand
-        gioiellii = gioielli.query.all()
+        gioielli = Gioielli.query.all()
         nomi_brand = []
-        for i in gioiellii:
+        for i in gioielli:
             nomi_brand.append(i.brand)
+
         # lista di clienti
-        customers = clienti.query.all()
+        customers = Clienti.query.all()
         arrayclienti = []
         for x in customers:
             arrayclienti.append(x.ragione_sociale)
 
-        # ottengo cursore da mongo se admin tutti ordini
-        # se agent solo ordini effettuati
+        # lista ordini se admin tutto se agent --> partial
         if session["type"] == "admin":
-            cursore = mongo.db.ordini.find()
+            orders = Ordini.query.all()
         else:
-            cursore = mongo.db.ordini.find({"agent_code": session["username"]})
+            orders = Ordini.query.filter_by(auhor=session["username"]).all()
 
         ordini = []
-        for i in cursore:
+        for i in orders:
             ordini.append(i)
 
         ordini.reverse()
 
-        if ordini:
-            indice_ordini = int(ordini[0]["ordine_numero"])
-        else:
-            indice_ordini = 0
+    # if ordini:
+    #   indice_ordini = int(ordini[0].codice)
+    # else:
+    #      indice_ordini = 0
 
     except:
         print("-- erorre in fetchin data ---")
@@ -264,7 +288,7 @@ def logging():  # admin/admin   agent/123     agent2/123
     username = request.form["username"]
     password = request.form["password"]
 
-    cursore = utenti.query.filter_by(email=username).first()
+    cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
         errore = "utente non  registrato"
@@ -299,7 +323,7 @@ def create_credentials():
                 frase = "errore nell'invio del messaggio password email"
                 back_to = "account"
                 return redirect(url_for("routing"))
-            new_utente = utenti(request.form["email"], password_generata)
+            new_utente = Utenti(request.form["email"], password_generata)
             db.session.add(new_utente)
             db.session.commit()
 
@@ -319,7 +343,7 @@ def create_credentials():
                 back_to = "account"
                 return redirect(url_for("routing"))
             else:
-                user = utenti.query.filter_by(request.form["email"]).first()
+                user = Utenti.query.filter_by(request.form["email"]).first()
                 user.password = password_generata
                 db.session.commit()
         except:
@@ -350,25 +374,32 @@ def adding_orders():
     global indice_ordini
     if request.form["tipo"] == "update":
         try:
-            result = mongo.db.utenti.update_one({"ordine_numero": request.form["ordine_numero"]},
-                                                {"$set": {"ragione_sociale": request.form["ragione_sociale"],
-                                                          "pagamento": request.form["pagamento"],
-                                                          "data": request.form["data"],
-                                                          "agent_code": session["username"]}})
+            result = Ordini.query.filter_by(codice=request.form["ordine_numero"]).first()
+            cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
+            result.pagamento = request.form["pagamento"]
+            result.data = request.form["data"]
+            result.cliente = cliente.codice_fiscale
+
+            # non effettua update del carrello, ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
+            #da qui tramite modifica
+
             print(result)
             return redirect(url_for("home"))
         except:
             print("update failed")
     else:
-
-        if indice_ordini == 0:
-            ordine_numero = 1
-            indice_ordini = indice_ordini + 1
-        else:
-            ordine_numero = indice_ordini + 1
-            indice_ordini = indice_ordini + 1
+        # canc se funziona sql autogenerate primarykey
+        # if indice_ordini == 0:
+        #   ordine_numero = 1
+        #   indice_ordini = indice_ordini + 1
+        # else:
+        #   ordine_numero = indice_ordini + 1
+        #  indice_ordini = indice_ordini + 1
 
         try:
+            cliente = Clienti.query.filter_by(request.form["ragione_sociale"]).first()
+            ordine = Ordini(session["username"], request.form["data"], spesa, cliente.codice_fiscale,
+                            request.form["pagamento"])
             mongo.db.ordini.insert(
                 {"ordine_numero": f"{indice_ordini}", "codice_cliente": "prova",
                  "ragione_sociale": request.form["ragione_sociale"],
