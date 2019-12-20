@@ -69,7 +69,7 @@ def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, ordine):
 
 # ordini------------
 class Ordini(db.Model):
-    author = db.Column(db.String(30), db.ForeignKey('Utenti.email'), nullable=False)
+    author = db.Column(db.String(30), db.ForeignKey('utenti.email'), nullable=False)
     codice = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False)
     totale = db.Column(db.Float, unique=True, nullable=False)
@@ -78,9 +78,8 @@ class Ordini(db.Model):
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
 
-def __init__(self, author, codice, data, totale, cliente, pagamento, carrello):
+def __init__(self, author, data, totale, cliente, pagamento, carrello):
     self.author = author
-    self.codice = codice
     self.data = data
     self.totale = totale
     self.cliente = cliente
@@ -204,7 +203,7 @@ def routing():
         if session["type"] == "admin":
             orders = Ordini.query.all()
         else:
-            orders = Ordini.query.filter_by(auhor=session["username"]).all()
+            orders = Ordini.query.filter_by(author=session["username"]).all()
 
         ordini = []
         for i in orders:
@@ -288,6 +287,7 @@ def logging():  # admin/admin   agent/123     agent2/123
     username = request.form["username"]
     password = request.form["password"]
 
+    # ricerca utente in DB
     cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
@@ -313,7 +313,7 @@ def logging():  # admin/admin   agent/123     agent2/123
 
 
 @app.route('/create_credentials', methods=["POST"])
-def create_credentials():
+def create_credentials():  #function per creare credenziali da pannello ADMIN
     global frase, back_to
     #crea utente
     if request.form["tipo-azione"] == "nuovo-utente":
@@ -380,21 +380,17 @@ def adding_orders():
             result.data = request.form["data"]
             result.cliente = cliente.codice_fiscale
 
-            # non effettua update del carrello, ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
-            #da qui tramite modifica
+            # non effettua update del carrello ma solo dati dal form
+            # ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
+            # da qui tramite modifica
 
             print(result)
             return redirect(url_for("home"))
         except:
             print("update failed")
     else:
-        # canc se funziona sql autogenerate primarykey
-        # if indice_ordini == 0:
-        #   ordine_numero = 1
-        #   indice_ordini = indice_ordini + 1
-        # else:
-        #   ordine_numero = indice_ordini + 1
-        #  indice_ordini = indice_ordini + 1
+        # altrimenti è una nuova creazione col tasto crea ordini dando per scontato che il carrello
+        # sia pieno!
 
         try:
             cliente = Clienti.query.filter_by(request.form["ragione_sociale"]).first()
