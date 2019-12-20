@@ -103,7 +103,7 @@ class Gioielli_Ordinati(db.Model):
 def __init__(self, brand, categoria, immagine, prezzo, codice, codice_ordine):
     self.brand = brand
     self.categoria = categoria
-    self.immagine = immagine
+    self.immagine = immagine - --
     self.prezzo = prezzo
     self.codice = codice
     self.codice_ordine = codice_ordine
