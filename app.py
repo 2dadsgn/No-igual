@@ -122,13 +122,16 @@ class Clienti(db.Model):
     partita_iva = db.Column(db.String(30), nullable=False, unique=True)
     codice_fiscale = db.Column(db.String(40), primary_key=True)
     email = db.Column(db.String(30), nullable=False)
+    codice_sdi = db.Column(db.String(30), nullable=False)
+    telefono = db.Column(db.Integer, nullable=False)
     banca = db.Column(db.String(30), nullable=False)
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
     ordini = db.relationship('Ordini', backref='cliente', lazy=True)
 
 
-def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, banca, iban,
+def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, codice_sdi, telefono,
+             banca, iban,
              ragione_sociale, ordini):
     self.nome = nome
     self.cognome = cognome
@@ -139,6 +142,8 @@ def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codic
     self.partita_iva = partita_iva
     self.codice_fiscale = codice_fiscale
     self.email = email
+    self.codice_sdi = codice_sdi
+    self.telefono = telefono
     self.banca = banca
     self.iban = iban
     self.ragione_sociale = ragione_sociale
@@ -371,7 +376,7 @@ def switch_modifica_crea():
 def adding_orders():
     global carrello
     global spesa
-    global indice_ordini
+
     if request.form["tipo"] == "update":
         try:
             result = Ordini.query.filter_by(codice=request.form["ordine_numero"]).first()
@@ -387,47 +392,26 @@ def adding_orders():
             print(result)
             return redirect(url_for("home"))
         except:
-            print("update failed")
+            print("update failed in adding_orders")
     else:
         # altrimenti è una nuova creazione col tasto crea ordini dando per scontato che il carrello
         # sia pieno!
 
         try:
-            cliente = Clienti.query.filter_by(request.form["ragione_sociale"]).first()
+            cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
             ordine = Ordini(session["username"], request.form["data"], spesa, cliente.codice_fiscale,
                             request.form["pagamento"])
-            mongo.db.ordini.insert(
-                {"ordine_numero": f"{indice_ordini}", "codice_cliente": "prova",
-                 "ragione_sociale": request.form["ragione_sociale"],
-                 "pagamento": request.form["pagamento"], "carrello": carrello, "data": request.form["data"],
-                 "agent_code": session["username"]})
-            error = 0
+            error = "ordine aggiunto correttamente in adding_orders"
 
         except:
-            error = 1
+            error = "erreo aggiunta ordine in adding_orders"
 
         carrello.clear()
         spesa=0
         print(error)
-        # ottengo cursore da mongo se admin tutti ordini
-        # se agent solo ordini effettuati
-        if session["type"] == "admin":
-            cursore = mongo.db.ordini.find()
-        else:
-            cursore = mongo.db.ordini.find({"agent_code": session["username"]})
 
-        ordini = []
-        for i in cursore:
-            ordini.append(i)
-
-        ordini.reverse()
-
-        if ordini:
-            indice_ordini = int(ordini[0]["ordine_numero"])
-        else:
-            indice_ordini = 0
     global frase, back_to
-    frase = "ordine effettuato con successo"
+    frase = "ordine avvenuto con successo"
     back_to = "ordini"
     if session["type"] == "admin":
 
@@ -438,22 +422,24 @@ def adding_orders():
 
 @app.route('/modifica_ordine', methods=["POST"])
 def modifica_ordine():
-    print("modifica")
-    cursore = mongo.db.ordini.find_one({"ordine_numero": request.form["value"]})
-    return render_template("modify-order.html", ordine=cursore)
+    print("modifica ordine in modifica_ordine")
+    # retrieve of the order with the form value, value is the unicode of the order
+    ordine_retrieve = Ordini.query.filter_by(codice=request.form["value"])
+
+    return render_template("modify-order.html", ordine=ordine_retrieve)
 
 
 @app.route('/elimina_ordine', methods=['POST'])
 def elimina_ordine():
-    global indice_ordini
 
     try:
+        retrieved = Ordini.query.filter_by(codice=request.form["value"]).first()
+        db.session.delete(retrieved)
+        db.session.commit()
 
-        mongo.db.ordini.delete_one({"ordine_numero": request.form["value"]})
-        indice_ordini = indice_ordini - 1
-        cursore = mongo.db.ordini.find()
+        cursore = Ordini.query.filter_by().all()
     except:
-        print("errore in deleting ")
+        print("errore in deleting in elimina_ordine ")
 
     return render_template("ordini.html", ordini=cursore)
 
@@ -461,23 +447,13 @@ def elimina_ordine():
 # aggiunta cliente nel db
 @app.route('/adding_customer', methods=['POST'])
 def adding_customer():
-    global codice_clienti
-    mongo.db.clienti.insert({
-        "nome": request.form["nome"],
-        "cognome": request.form["cognome"],
-        "ragione_sociale": request.form["ragione_sociale"],
-        "via": request.form["via"],
-        "cap": request.form["cap"],
-        "città": request.form["città"],
-        "provincia": request.form["provincia"],
-        "partita_iva": request.form["partita_iva"],
-        "codice_fiscale": request.form["codice_fiscale"],
-        "codice_sdi": request.form["codice_sdi"],
-        "email": request.form["email"],
-        "telefono": request.form["telefono"],
-        "banca": request.form["banca"],
-        "iban": request.form["iban"]
-    })
+    customer = Clienti(request.form["nome"], request.form["cognome"], request.form["via"], request.form["cap"]
+                       , request.form["città"], request.form["provincia"], request.form["partita_iva"],
+                       request.form["codice_fiscale"],
+                       request.form["email"], request.form["codice_sdi"], request.form["telefono"],
+                       request.form["banca"],
+                       request.form["iban"])
+
     return render_template("welcome.html", frase="Cliente aggiunto", back_to="clienti")
 
 
