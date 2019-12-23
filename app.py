@@ -67,9 +67,11 @@ class Brand(db.Model):
     categorie = db.relationship('Categorie', backref='marca', lazy=True)
     oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
 
-    def __init__(self, nome, img):
+    def __init__(self, nome, img, categorie, oggetto):
         self.nome = nome
         self.img = img
+        self.categorie = categorie
+        self.oggetto = oggetto
 
 
 # --------------------
@@ -81,8 +83,10 @@ class Categorie(db.Model):
     brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
     gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
 
-    def __init__(self, nome):
+    def __init__(self, nome, brand, gioielli):
         self.nome = nome
+        self.brand = brand
+        self.gioielli = gioielli
 
 
 # ordini------------
