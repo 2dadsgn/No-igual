@@ -46,8 +46,8 @@ class Utenti(db.Model):
 
 # gioielli------------
 class Gioielli(db.Model):
-    brand = db.Column(db.String(30), nullable=False)
-    categoria = db.Column(db.String(20), nullable=False)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
+    categoria = db.Column(db.String(20), db.ForeignKey('categorie.nome'))
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
     codice = db.Column(db.String(30), primary_key=True)
@@ -59,6 +59,30 @@ class Gioielli(db.Model):
         self.prezzo = prezzo
         self.codice = codice
 # -------------------------
+
+# ---------BRAND----------
+class Brand(db.Model):
+    nome = db.Column(db.String(20), primary_key=True)
+    img = db.Column(db.String(30), nullable=False, default='140X140.gif')
+    categorie = db.relationship('Categorie', backref='marca', lazy=True)
+    oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
+
+    def __init__(self, nome, img):
+        self.nome = nome
+        self.img = img
+
+
+# --------------------
+
+
+# ---------categorie----------
+class Categorie(db.Model):
+    nome = db.Column(db.String(20), primary_key=True)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
+    gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
+
+    def __init__(self, nome):
+        self.nome = nome
 
 
 # ordini------------
@@ -183,9 +207,10 @@ def routing():
     global indice_ordini
     try:
         # lista di brand
-        gioielli = Gioielli.query.all()
+        brand = Brand.query.all()
+        print(brand)
         nomi_brand = []
-        for i in gioielli:
+        for i in brand:
             nomi_brand.append(i.brand)
 
         # lista di clienti
@@ -230,7 +255,7 @@ def routing():
             return render_template("ordini.html", ordini=ordini)
 
         elif request.form["value"] == "espositore":
-            # effettuare distinzione admin agemnt
+            # effettuare distinzione admin agent
             return render_template("manage_admin.html", nomi_brand=nomi_brand)
 
         elif request.form["value"] == "account":
@@ -477,6 +502,11 @@ def upload_info_file():
                             request.form[f"prezzo{i}"])
         db.session.add(gioiello)
         db.session.commit()
+
+    # devo inserire anche il brand
+    brand = Brand(request.form["brand"])
+    db.session.add(brand)
+    db.session.commit()
 
     return redirect(url_for("routing"))
 
