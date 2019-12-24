@@ -47,7 +47,7 @@ class Utenti(db.Model):
 # gioielli------------
 class Gioielli(db.Model):
     brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
-    categoria = db.Column(db.String(20), db.ForeignKey('categorie.nome'))
+    categoria = db.Column(db.String(20), db.ForeignKey('categorie.unicode'))
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
     codice = db.Column(db.String(30), primary_key=True)
@@ -63,15 +63,12 @@ class Gioielli(db.Model):
 # ---------BRAND----------
 class Brand(db.Model):
     nome = db.Column(db.String(20), primary_key=True)
-    img = db.Column(db.String(30), nullable=False, default='140X140.gif')
+    img = db.Column(db.String(30), nullable=True, default='140X140.gif')
     categorie = db.relationship('Categorie', backref='marca', lazy=True)
     oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
 
-    def __init__(self, nome, img, categorie, oggetto):
+    def __init__(self, nome):
         self.nome = nome
-        self.img = img
-        self.categorie = categorie
-        self.oggetto = oggetto
 
 
 # --------------------
@@ -79,14 +76,15 @@ class Brand(db.Model):
 
 # ---------categorie----------
 class Categorie(db.Model):
-    nome = db.Column(db.String(20), primary_key=True)
+    unicode = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(20), nullable=False)
     brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
     gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
 
-    def __init__(self, nome, brand, gioielli):
+    def __init__(self, nome, brand):
         self.nome = nome
         self.brand = brand
-        self.gioielli = gioielli
+
 
 
 # ordini------------
@@ -99,13 +97,13 @@ class Ordini(db.Model):
     pagamento = db.Column(db.String(20), nullable=False)
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
-    def __init__(self, author, data, totale, cliente, pagamento, carrello):
+    def __init__(self, author, data, totale, cliente, pagamento):
         self.author = author
         self.data = data
         self.totale = totale
         self.cliente = cliente
         self.pagamento = pagamento
-        self.carrello = carrello
+
 
 # -------------------------
 
@@ -150,9 +148,7 @@ class Clienti(db.Model):
     ordini = db.relationship('Ordini', backref='ordinato_da', lazy=True)
 
     def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, codice_sdi,
-                 telefono,
-                 banca, iban,
-                 ragione_sociale, ordini):
+                 telefono, banca, iban, ragione_sociale):
         self.nome = nome
         self.cognome = cognome
         self.via = via
@@ -167,7 +163,7 @@ class Clienti(db.Model):
         self.banca = banca
         self.iban = iban
         self.ragione_sociale = ragione_sociale
-        self.ordini = ordini
+
 # -------------------------
 
 
@@ -212,16 +208,10 @@ def routing():
     try:
         # lista di brand
         brand = Brand.query.all()
-        print(brand)
-        nomi_brand = []
-        for i in brand:
-            nomi_brand.append(i.brand)
 
         # lista di clienti
         customers = Clienti.query.all()
-        arrayclienti = []
-        for x in customers:
-            arrayclienti.append(x.ragione_sociale)
+
 
         # lista ordini se admin tutto se agent --> partial
         if session["type"] == "admin":
@@ -235,24 +225,20 @@ def routing():
 
         ordini.reverse()
 
-    # if ordini:
-    #   indice_ordini = int(ordini[0].codice)
-    # else:
-    #      indice_ordini = 0
 
     except:
-        print("-- erorre in fetchin data ---")
+        print("-- error in fetchin data for routing ---")
     try:
         errore = "nessuno"
 
         if request.form["value"] == "clienti":
             errore = "in clienti"
-            return render_template("clienti.html", clienti=arrayclienti)
+            return render_template("clienti.html", clienti=customers)
 
         elif request.form["value"] == "aggiungi_cliente" :
             return render_template("crea_cliente.html")
         elif request.form["value"] == "rimuovi_cliente":
-            return render_template("elimina_cliente.html", clienti=arrayclienti)
+            return render_template("elimina_cliente.html", clienti=customers)
 
         elif request.form["value"] == "ordini" :
             errore = "in ordini"
@@ -260,7 +246,7 @@ def routing():
 
         elif request.form["value"] == "espositore":
             # effettuare distinzione admin agent
-            return render_template("manage_admin.html", nomi_brand=nomi_brand)
+            return render_template("manage_admin.html", nomi_brand=brand)
 
         elif request.form["value"] == "account":
             return render_template("account.html")
@@ -273,13 +259,13 @@ def routing():
         #crea ordine
         elif request.form["value"] == "crea_ordine":
 
-            return render_template("crea_ordine.html", clienti=arrayclienti, carrello=carrello, totale=spesa)
+            return render_template("crea_ordine.html", clienti=customers, carrello=carrello, totale=spesa)
         print("non trova nessun route da soddisfare in function routing")
 
 
     except:
         global frase
-        print("none value")
+        print("nessuna frase in routing")
 
         if frase == "null" and session["username"]:
             frase = "Benvenuto " + session["username"]
@@ -315,6 +301,9 @@ def logging():  # admin/admin   agent/123     agent2/123
     cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
+        biagio = Utenti(username, generate_password_hash(password), 1)
+        db.session.add(biagio)
+        db.session.commit()
         errore = "utente non  registrato"
         return render_template('home.html', error_name=errore)
 
@@ -502,8 +491,8 @@ def allowed_file(filename):
 def upload_info_file():
 
     for i in nomi_file:
-        gioiello = Gioielli(request.form["brand"], request.form["album"], i, request.form[f"codice_id{i}"],
-                            request.form[f"prezzo{i}"])
+        gioiello = Gioielli(request.form["brand"], request.form["album"], i, float(request.form[f"prezzo{i}"]),
+                            request.form[f"codice_id{i}"])
         db.session.add(gioiello)
         db.session.commit()
 
