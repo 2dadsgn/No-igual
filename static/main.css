@@ -281,7 +281,7 @@ li {
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
-    padding: 0;
+    padding: 2vh 10vw 0em 10vw;
 }
 
 .img-ogg {

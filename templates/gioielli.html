@@ -1,0 +1,78 @@
+<div id="target">
+    <div class="row" id="sezione-espositore" style="width: 95vw;height: 100%">
+        <div class="row" style="width: 100%">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <h3 class="dritto" style="text-transform: uppercase">{{ album.nome }}</h3>
+            </div>
+            <div class="col-4"></div>
+
+        </div>
+        <div class="row" style="width: 100%;padding: 1em;margin-left: 20px!important;">
+            {% for c in gioielli %}
+                <!--iterazione per creare griglia oggetti -->
+                <div id="1" class="col-10 col-md-3 col-lg-3"
+                     style="margin-bottom: 50px;width: 100%;margin-left: 5vw;">
+                    <!--img dell oggetto -->
+                    <img class="dritto" height="200px" width="200px"
+                         src="{{ url_for("static",filename=c.immagine) }}"
+                         onclick="http('/view_img','target','{{ c.immagine }}')">
+
+
+                    <input class="hidden" type="text" name="nome_file" value="{{ i }}">
+                    <!-- codice -->
+                    <div class="row">
+
+                        <h2 style="display:inline;text-align: right" class="col-6">COD:</h2>
+                        <h2 style="display:inline;text-align: left" id="codice"
+                            class="col-6">{{ c.codice }}</h2>
+                    </div>
+
+
+                    <!-- prezzo-->
+                    <div class="row">
+                        <h2 style="display:inline;text-align: right" class="col-6">Prezzo:</h2>
+                        <h2 style="display:inline;text-align: left"
+                            id="{{ c.prezzo }}prezzo" class="col-6">{{ c.prezzo }}</h2>
+                    </div>
+
+
+                    <div class="col-12">
+                        <div class="row">
+                            <input id="{{ c.codice }}radio" class="dritto" type="radio">
+                            <!-- input quantita -->
+                            <input style="text-align: center;width: 60px" class="dritto"
+                                   id="{{ c.codice }}quantita"
+                                   type="number" value="1">
+                        </div>
+                        <div class="row" style="margin: 10px 0 20px 0;">
+                            <!--tasto per aggiungere al carrello -->
+
+                            <button class="col-6 dritto"
+                                    onclick="http_cart('/add_to_cart','{{ c.codice }}')">
+                                Aggiungi
+                            </button>
+                            <button class="col-6"
+                                    onclick="http_cart('/remove_from_cart','{{ c.codice }}')">
+                                Rimuovi
+                            </button>
+
+
+                        </div>
+
+                    </div>
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-3"></div>
+                            <!--tasto per rimuovere dal carrello -->
+
+                            <div class="col-3"></div>
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>

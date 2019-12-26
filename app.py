@@ -67,8 +67,9 @@ class Brand(db.Model):
     categorie = db.relationship('Categorie', backref='marca', lazy=True)
     oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
 
-    def __init__(self, nome):
+    def __init__(self, nome, img):
         self.nome = nome
+        self.img = img
 
 
 # --------------------
@@ -80,10 +81,12 @@ class Categorie(db.Model):
     nome = db.Column(db.String(20), nullable=False)
     brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
     gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
+    img = db.Column(db.String(30), nullable=True, default='140X140.gif')
 
-    def __init__(self, nome, brand):
+    def __init__(self, nome, brand, img):
         self.nome = nome
         self.brand = brand
+        self.img = img
 
 
 
@@ -491,15 +494,34 @@ def allowed_file(filename):
 def upload_info_file():
 
     for i in nomi_file:
-        gioiello = Gioielli(request.form["brand"], request.form["album"], i, float(request.form[f"prezzo{i}"]),
+        try:
+            prezzo = float(request.form[f"prezzo{i}"])
+        except:
+            tmp = request.form[f"prezzo{i}"]
+            tmp.rsplit(',', 1)
+            prezzo = tmp[0] + "." + tmp[1]
+            prezzo = float(prezzo)
+        print(prezzo)
+        gioiello = Gioielli(request.form["brand"], request.form["album"], i, prezzo,
                             request.form[f"codice_id{i}"])
         db.session.add(gioiello)
         db.session.commit()
 
-    # devo inserire anche il brand
-    brand = Brand(request.form["brand"])
-    db.session.add(brand)
-    db.session.commit()
+    # devo inserire anche il brand e categoria
+    if Brand.query.filter_by(nome=request.form["brand"]).first():
+        categoria = Categorie(request.form["album"], request.form["brand"], i)
+        db.session.add(categoria)
+        db.session.commit()
+    else:
+        brand = Brand(request.form["brand"], i)
+        db.session.add(brand)
+        db.session.commit()
+        categoria = Categorie(request.form["album"], request.form["brand"], i)
+        db.session.add(categoria)
+        db.session.commit()
+
+
+
 
     return redirect(url_for("routing"))
 
@@ -540,10 +562,20 @@ def upload_file():
 @app.route("/espositore", methods=["POST", "GET"])
 def mostra_espositore():
     global brand_attuale
-
     brand_attuale = request.form["value"]
-    brand = Gioielli.query.filter_by(brand=request.form["value"])
-    return render_template("album.html", album=brand)
+    brand = Brand.query.filter_by(nome=request.form["value"]).first()
+
+    return render_template("album.html", brand=brand)
+
+
+@app.route("/categoria", methods=["POST", "GET"])
+def mostra_categoria():
+    global brand_attuale
+
+    categoria_attuale = request.form["value"]
+    categoria = Categorie.query.filter_by(nome=request.form["value"], brand=brand_attuale).first()
+
+    return render_template("gioielli.html", album=categoria, gioielli=gioielli)
 
 
 @app.route("/view_img", methods=["POST", "GET"])
