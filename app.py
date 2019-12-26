@@ -46,26 +46,28 @@ class Utenti(db.Model):
 
 # gioielli------------
 class Gioielli(db.Model):
-    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
-    categoria = db.Column(db.String(20), db.ForeignKey('categorie.unicode'))
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'))
+    categoria = db.Column(db.Integer, db.ForeignKey('categorie.unicode'))
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
     codice = db.Column(db.String(30), primary_key=True)
 
-    def __init__(self, brand, categoria, immagine, prezzo, codice):
-        self.brand = brand
-        self.categoria = categoria
+    def __init__(self, immagine, prezzo, codice, brand, categoria):
+
         self.immagine = immagine
         self.prezzo = prezzo
         self.codice = codice
+        self.brand = brand
+        self.categoria = categoria
 # -------------------------
 
 # ---------BRAND----------
 class Brand(db.Model):
     nome = db.Column(db.String(20), primary_key=True)
     img = db.Column(db.String(30), nullable=True, default='140X140.gif')
-    categorie = db.relationship('Categorie', backref='marca', lazy=True)
+    categorie = db.relationship('Categorie', backref='category', lazy=True)
     oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
+    ordinati = db.relationship('Gioielli_Ordinati', backref='marca', lazy=True)
 
     def __init__(self, nome, img):
         self.nome = nome
@@ -81,6 +83,7 @@ class Categorie(db.Model):
     nome = db.Column(db.String(20), nullable=False)
     brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
     gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
+    ordinati = db.relationship('Gioielli_Ordinati', backref='category', lazy=True)
     img = db.Column(db.String(30), nullable=True, default='140X140.gif')
 
     def __init__(self, nome, brand, img):
@@ -114,20 +117,18 @@ class Ordini(db.Model):
 # gioielli ordinati------------
 class Gioielli_Ordinati(db.Model):
     unicode = db.Column(db.Integer, primary_key=True)
-    brand = db.Column(db.String(30), nullable=False)
-    categoria = db.Column(db.String(20), nullable=False)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
+    categoria = db.Column(db.Integer, db.ForeignKey('categorie.unicode'), nullable=False)
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
-    codice = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
+    codice_barre = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
     codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
 
-    def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, codice_ordine):
-        self.unicode = unicode
-        self.brand = brand
-        self.categoria = categoria
+    def __init__(self, immagine, prezzo, codice_barre, codice_ordine):
+
         self.immagine = immagine
         self.prezzo = prezzo
-        self.codice = codice
+        self.codice_barre = codice_barre
         self.codice_ordine = codice_ordine
 # -------------------------
 
@@ -172,14 +173,11 @@ class Clienti(db.Model):
 
 #########################
 
-
-
 app.host = '0.0.0.0'
 
-# global orders index
-# indice_ordini = 0
 # global clients code
 codice_clienti = 0
+
 # nomifile global
 nomi_file = []
 
@@ -188,6 +186,7 @@ spesa = 0.0
 
 # global brand in visualizzazione
 brand_attuale = "none"
+categoria_attuale = "none"
 
 # carrello
 carrello = []
@@ -492,36 +491,34 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
-
-    for i in nomi_file:
-        try:
-            prezzo = float(request.form[f"prezzo{i}"])
-        except:
-            tmp = request.form[f"prezzo{i}"]
-            tmp.rsplit(',', 1)
-            prezzo = tmp[0] + "." + tmp[1]
-            prezzo = float(prezzo)
-        print(prezzo)
-        gioiello = Gioielli(request.form["brand"], request.form["album"], i, prezzo,
-                            request.form[f"codice_id{i}"])
-        db.session.add(gioiello)
-        db.session.commit()
-
     # devo inserire anche il brand e categoria
     if Brand.query.filter_by(nome=request.form["brand"]).first():
-        categoria = Categorie(request.form["album"], request.form["brand"], i)
+        categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
         db.session.add(categoria)
         db.session.commit()
     else:
-        brand = Brand(request.form["brand"], i)
+        brand = Brand(request.form["brand"], nomi_file[0])
         db.session.add(brand)
         db.session.commit()
-        categoria = Categorie(request.form["album"], request.form["brand"], i)
+        categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
         db.session.add(categoria)
         db.session.commit()
 
-
-
+    for i in nomi_file:
+        # escamotage per trasformare stringa con , in float  con .
+        try:
+            prezzo = float(request.form[f"prezzo{i}"])
+        except:
+            tmp = []
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
+            prezzo = tmp[0] + "." + tmp[1]
+            prezzo = float(prezzo)
+        print(prezzo)
+        gioiello = Gioielli(i, prezzo,
+                            request.form[f"codice_id{i}"], request.form["brand"], categoria.unicode)
+        db.session.add(gioiello)
+        db.session.commit()
 
     return redirect(url_for("routing"))
 
@@ -559,6 +556,7 @@ def upload_file():
     return render_template("welcome.html", frase="Errore in upload file")
 
 
+# route per pagina categorie dello specifico brand
 @app.route("/espositore", methods=["POST", "GET"])
 def mostra_espositore():
     global brand_attuale
@@ -568,12 +566,17 @@ def mostra_espositore():
     return render_template("album.html", brand=brand)
 
 
+#route per pagina gioielli della specifica categoria
 @app.route("/categoria", methods=["POST", "GET"])
 def mostra_categoria():
     global brand_attuale
-
-    categoria_attuale = request.form["value"]
-    categoria = Categorie.query.filter_by(nome=request.form["value"], brand=brand_attuale).first()
+    global categoria_attuale
+    categoria = Categorie.query.filter_by(unicode=request.form["value"]).first()
+    categoria_attuale = categoria.nome
+    gioielli = categoria.gioielli
+    print(brand_attuale, categoria_attuale)
+    for i in gioielli:
+        print(i)
 
     return render_template("gioielli.html", album=categoria, gioielli=gioielli)
 
