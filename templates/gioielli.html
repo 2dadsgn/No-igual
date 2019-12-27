@@ -39,8 +39,10 @@
                     <!-- prezzo-->
                     <div class="row">
                         <h2 style="display:inline;text-align: right" class="col-6">Prezzo:</h2>
+
+                        <!-- in input tramite _AJAX_-->
                         <h2 style="display:inline;text-align: left"
-                            id="{{ c.prezzo }}prezzo" class="col-6">{{ c.prezzo }}</h2>
+                            id="{{ c.codice }}prezzo" class="col-6">{{ c.prezzo }}</h2>
                     </div>
 
 
@@ -48,6 +50,8 @@
                         <div class="row">
                             <input id="{{ c.codice }}radio" class="dritto" type="radio">
                             <!-- input quantita -->
+
+                            <!-- in input tramite _AJAX_-->
                             <input style="text-align: center;width: 60px" class="dritto"
                                    id="{{ c.codice }}quantita"
                                    type="number" value="1">

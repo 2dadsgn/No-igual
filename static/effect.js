@@ -58,6 +58,8 @@ function highlight(id) {
     }
 }
 */
+
+
 /*funzione apertura menu*/
 function menu_open() {
     document.getElementById("exit").style.display = "block";
@@ -130,7 +132,6 @@ function http_cart(url, codice) {
     prezzo = prezzo.replace(",", ".");
 
     let data = [codice, quantita, prezzo];
-
 
 
     const Http = new XMLHttpRequest();

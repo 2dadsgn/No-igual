@@ -376,9 +376,9 @@ def create_credentials():  #function per creare credenziali da pannello ADMIN
 @app.route('/switch_modifica_crea', methods=["POST"])
 def switch_modifica_crea():
     if request.form["value"] == "new-utente":
-        return ' <h4>Inserisci nuova email</h4> <input class="dritto" type="email" name="email" value="inserisci email">' + '<p>La password sarà generata automaticamente<br> e inviata via email</p>' + '<input class="dritto" type="submit" value="Procedi">'
+        return ' <h4>Inserisci nuova email</h4> <input class="dritto" type="email" name="email" value="">' + '<p>La password sarà generata automaticamente<br> e inviata via email</p>' + '<input class="dritto" type="submit" value="Procedi">'
     else:
-        return '<h4 class="dritto">Inserisci vecchia email</h4><input class="dritto " type="email" name="vecchia-email" value="inserisci email"><h4>Inserisci nuova email</h4><input class="dritto" type="email" name="email" value="inserisci email"><p>La password sarà generata automaticamente<br> e inviata via email</p><input class="dritto" type="submit" value="Procedi">'
+        return '<h4 class="dritto">Inserisci vecchia email</h4><input class="dritto " type="email" name="vecchia-email" value=""><h4>Inserisci nuova email</h4><input class="dritto" type="email" name="email" value=""><p>La password sarà generata automaticamente<br> e inviata via email</p><input class="dritto" type="submit" value="Procedi">'
 
 
 
@@ -494,11 +494,31 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
-    # devo inserire anche il brand e categoria
+    # se il brand esiste già
     if Brand.query.filter_by(nome=request.form["brand"]).first():
-        categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
-        db.session.add(categoria)
-        db.session.commit()
+        # se la categoria esiste già effettua update gioielli match su codice
+        if Categorie.query.filter_by(brand=request.form["brand"], nome=request.form["album"]):
+            cursore = Categorie.query.filter_by(brand=request.form["brand"], nome=request.form["album"]).first()
+            gioielli = cursore.gioielli
+            for i in gioielli:
+                for x in nomi_file:
+                    if i.codice == request.form[f"codice_id{x}"]:
+                        try:
+                            prezzo = float(request.form[f"prezzo{x}"])
+                        except:
+                            tmp = []
+                            tmp.append(request.form[f"prezzo{x}"].rsplit(',', 1)[0])
+                            tmp.append(request.form[f"prezzo{x}"].rsplit(',', 1)[1])
+                            prezzo = tmp[0] + "." + tmp[1]
+                            prezzo = float(prezzo)
+                        i.prezzo = prezzo
+                        i.immagine = x
+                        db.session.commit()
+        else:
+            categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
+            db.session.add(categoria)
+            db.session.commit()
+
     else:
         brand = Brand(request.form["brand"], nomi_file[0])
         db.session.add(brand)
@@ -506,22 +526,23 @@ def upload_info_file():
         categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
         db.session.add(categoria)
         db.session.commit()
+        for i in nomi_file:
+            # escamotage per trasformare stringa con , in float  con .
+            try:
+                prezzo = float(request.form[f"prezzo{i}"])
+            except:
+                tmp = []
+                tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
+                tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
+                prezzo = tmp[0] + "." + tmp[1]
+                prezzo = float(prezzo)
+            print(prezzo)
+            gioiello = Gioielli(i, prezzo,
+                                request.form[f"codice_id{i}"], request.form["brand"], categoria.unicode)
+            db.session.add(gioiello)
+            db.session.commit()
 
-    for i in nomi_file:
-        # escamotage per trasformare stringa con , in float  con .
-        try:
-            prezzo = float(request.form[f"prezzo{i}"])
-        except:
-            tmp = []
-            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
-            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
-            prezzo = tmp[0] + "." + tmp[1]
-            prezzo = float(prezzo)
-        print(prezzo)
-        gioiello = Gioielli(i, prezzo,
-                            request.form[f"codice_id{i}"], request.form["brand"], categoria.unicode)
-        db.session.add(gioiello)
-        db.session.commit()
+
 
     return redirect(url_for("routing"))
 
@@ -576,13 +597,14 @@ def mostra_espositore():
 def mostra_categoria():
     global brand_attuale, categoria_attuale, prev
 
-
     categoria = Categorie.query.filter_by(unicode=request.form["value"]).first()
-    categoria_attuale = categoria.nome
+    categoria_attuale = request.form["value"]
     gioielli = categoria.gioielli
     print(brand_attuale, categoria_attuale)
     for i in gioielli:
         print(i)
+    prev.clear()
+    prev.append("espositore")
     prev.append(brand_attuale)
 
     return render_template("gioielli.html", album=categoria, gioielli=gioielli, prev=prev)
@@ -590,8 +612,8 @@ def mostra_categoria():
 
 @app.route("/view_img", methods=["POST", "GET"])
 def view_img():
-    global brand_attuale
-    return render_template("view_img.html", url_foto=request.form["value"], brand_attuale=brand_attuale)
+    global brand_attuale, categoria_attuale
+    return render_template("view_img.html", url_foto=request.form["value"], categoria=categoria_attuale)
 
 @app.route("/add_to_cart", methods=["POST", "GET"])
 def add_to_cart():

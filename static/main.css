@@ -3,7 +3,9 @@
 body {
     padding: 20vh 0 0 0;
     font-size: 15px;
+
 }
+
 
 
 #login input {
@@ -301,13 +303,27 @@ li {
     display: inline;
     margin-left: 10px !important;
     line-height: 40px !important;
+    font-family: 'EB Garamond', serif;
+}
+
+#sezione-espositore h3 {
+    font-size: 25px !important;
+    text-transform: capitalize !important;
+    font-weight: 700;
+
+
+}
+
+#sezione-espositore h9:hover {
+    color: darkgrey;
 }
 
 #sezione-espositore h9 {
     font-size: 20px;
     font-weight: 100;
-    text-transform: uppercase;
+    text-transform: capitalize;
     margin-right: 20px;
+    cursor: pointer;
 
 }
 
