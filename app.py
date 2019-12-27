@@ -198,6 +198,9 @@ quantity = []
 frase = "null"
 back_to = "null"
 
+# array per briciole di pane in espositore
+prev = []
+
 
 @app.route('/')
 def index():
@@ -559,26 +562,30 @@ def upload_file():
 # route per pagina categorie dello specifico brand
 @app.route("/espositore", methods=["POST", "GET"])
 def mostra_espositore():
-    global brand_attuale
+    global brand_attuale, prev
     brand_attuale = request.form["value"]
     brand = Brand.query.filter_by(nome=request.form["value"]).first()
+    prev.clear()
+    prev.append("espositore")
 
-    return render_template("album.html", brand=brand)
+    return render_template("album.html", brand=brand, prev=prev)
 
 
 #route per pagina gioielli della specifica categoria
 @app.route("/categoria", methods=["POST", "GET"])
 def mostra_categoria():
-    global brand_attuale
-    global categoria_attuale
+    global brand_attuale, categoria_attuale, prev
+
+
     categoria = Categorie.query.filter_by(unicode=request.form["value"]).first()
     categoria_attuale = categoria.nome
     gioielli = categoria.gioielli
     print(brand_attuale, categoria_attuale)
     for i in gioielli:
         print(i)
+    prev.append(brand_attuale)
 
-    return render_template("gioielli.html", album=categoria, gioielli=gioielli)
+    return render_template("gioielli.html", album=categoria, gioielli=gioielli, prev=prev)
 
 
 @app.route("/view_img", methods=["POST", "GET"])

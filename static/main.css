@@ -296,6 +296,21 @@ li {
     margin: auto;
 }
 
+#sezione-espositore h3, #sezione-espositore h9 {
+    float: left !important;
+    display: inline;
+    margin-left: 10px !important;
+    line-height: 40px !important;
+}
+
+#sezione-espositore h9 {
+    font-size: 20px;
+    font-weight: 100;
+    text-transform: uppercase;
+    margin-right: 20px;
+
+}
+
 #sezione-espositore button {
     text-align: center;
     padding: 5px;

@@ -1,32 +1,32 @@
 <div id="target">
 
-        <!--SEZIONE ESPOSITORE-->
-        <div class="row" id="sezione-espositore">
+    <!--SEZIONE ESPOSITORE-->
+    <div class="row" id="sezione-espositore">
 
 
-            <div class="row">
-                {% for i in nomi_brand %}
-                    <div class="col-1 col-md-1 col-lg-1"></div>
-                    <div class="col-10 col-md-4 col-lg-3">
+        <div class="row">
+            {% for i in nomi_brand %}
+
+                <div class="col-10 col-md-5 col-lg-4">
+
+                    <h2 style="width: 200px" class="dritto">{{ i.nome }}</h2>
+
+                    <img id="imgclick" onclick="http('/espositore','target','{{ i.nome }}')"
+                         class="dritto img-ogg"
+                         src="{{ url_for('static',filename=i.img) }}" width="200px"
+                         height="200px"
+                         alt=""/>
+
+                </div>
 
 
-                        <h2 style="width: 200px" class="dritto">{{ i.nome }}</h2>
-
-                            <img id="imgclick" onclick="http('/espositore','target','{{ i.nome }}')"
-                                 class="dritto img-ogg"
-                                 src="{{ url_for('static',filename=i.img) }}" width="100%"
-                                 height="100%"
-                                 alt=""/>
-
-                    </div>
-                    <div class="col-1 col-md-1 col-lg-1"></div>
-                {% endfor %}
-
-            </div>
-
+            {% endfor %}
 
         </div>
-        <!--FINE SEZXIONE ESPOSITORE-->
+
+
+    </div>
+    <!--FINE SEZXIONE ESPOSITORE-->
 </div>
 
 

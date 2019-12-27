@@ -1,11 +1,18 @@
 <div id="target">
     <div class="row" id="sezione-espositore" style="width: 95vw;height: 100%">
         <div class="row" style="width: 100%">
-            <div class="col-4"></div>
-            <div class="col-4">
+            <div class="col-1"></div>
+            <div class="col-11">
+                {% for i in prev %}
+                    {% if i=="espositore" %}
+                        <h9 onclick="http('/routing','target','espositore')">espositore -></h9>
+                    {% else %}
+                        <h9 onclick="http('/espositore','target','{{ i }}')">{{ i }} -></h9>
+                    {% endif %}
+                {% endfor %}
                 <h3 class="dritto" style="text-transform: uppercase">{{ album.nome }}</h3>
             </div>
-            <div class="col-4"></div>
+
 
         </div>
         <div class="row" style="width: 100%;padding: 1em;margin-left: 20px!important;">
