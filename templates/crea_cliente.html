@@ -4,7 +4,9 @@
         <form method="post" action="{{ url_for('adding_customer') }}">
             <div class="col-md-10 box-gray-clienti-add">
                 <div class="row">
-                    <div class="col-6">
+
+
+                    <div class="col-6 col-md-6 col-lg-6">
                         <h4 class="col-6">Nome</h4>
                         <input name="nome" type="text">
                         <h4 class="col-6">cognome</h4>
@@ -20,7 +22,7 @@
                         <h4 class="col-6">provincia</h4>
                         <input name="provincia" type="text">
                     </div>
-                    <div class="col-6">
+                    <div class="col-6 col-md-6 col-lg-6">
                         <h4 class="col-6">Partita Iva</h4>
                         <input name="partita_iva" type="text">
                         <h4 class="col-6">codice fiscale</h4>
@@ -36,13 +38,14 @@
                         <h4 class="col-6">Iban</h4>
                         <input name="iban" type="text">
                     </div>
+
                 </div>
             </div>
             <div class="row div-tasti">
-                <button class="tasto-canc" id="indietro-cliente" onclick="http('/routing','target','clienti')">
+                <button class="tasto-canc dritto" id="indietro-cliente" onclick="http('/routing','target','clienti')">
                     indietro
                 </button>
-                <button type="submit" value="Inserisci">Inserisci</button>
+                <button class="dritto" type="submit" value="Inserisci">Inserisci</button>
             </div>
         </form>
     </div>

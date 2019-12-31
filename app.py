@@ -22,8 +22,8 @@ app.secret_key = b'_52ksaLFwerWWrcdesal'
 
 app.config['MAIL_SERVER'] = 'out.virgilio.it'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'lubrano.biagio@virgilio.it'
-app.config['MAIL_PASSWORD'] = 'prova'
+app.config['MAIL_USERNAME'] = 'provaprovaprova52@virgilio.it'
+app.config['MAIL_PASSWORD'] = 'progettodb52'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -35,7 +35,7 @@ mail = Mail(app)
 class Utenti(db.Model):
     email = db.Column(db.String(20), primary_key=True, nullable=False)
     password = db.Column(db.String(12), nullable=False)
-    poteri = db.Column(db.Integer, nullable=False, default=0)
+    poteri = db.Column(db.Integer, nullable=True, default=0)
     ordini = db.relationship('Ordini', backref='utente', lazy=True)
 
     def __init__(self, email, password, poteri):
@@ -136,7 +136,7 @@ class Gioielli_Ordinati(db.Model):
 # clienti------------
 class Clienti(db.Model):
     nome = db.Column(db.String(10), nullable=False)
-    cognnome = db.Column(db.String(15), nullable=False)
+    cognome = db.Column(db.String(15), nullable=False)
     via = db.Column(db.String(30), nullable=False)
     cap = db.Column(db.Integer, nullable=False)
     citta = db.Column(db.String(20), nullable=False)
@@ -213,11 +213,15 @@ def routing():
     try:
         # lista di brand
         brand = Brand.query.all()
-
+    except:
+        print("-- error in fetchin brand for routing ---")
+    try:
         # lista di clienti
         customers = Clienti.query.all()
+    except:
+        print("-- error in fetchin clienti for routing ---")
 
-
+    try:
         # lista ordini se admin tutto se agent --> partial
         if session["type"] == "admin":
             orders = Ordini.query.all()
@@ -229,10 +233,11 @@ def routing():
             ordini.append(i)
 
         ordini.reverse()
-
-
     except:
-        print("-- error in fetchin data for routing ---")
+        print("-- error in fetchin ordini for routing ---")
+
+
+
     try:
         errore = "nessuno"
 
@@ -287,18 +292,16 @@ def sending_email(destinatario):
                                 , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
                                 , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
-    msg = Message('Accesso credenziali', sender='No Igual gioielli', recipients=destinatario)
+    msg = Message('Accesso credenziali', sender='provaprovaprova52@virgilio.it', recipients=destinatario)
     msg.body = f"ciao  {destinatario} , conserva queste informazioni accuratamente,ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No Igual gioielli, questa è la tua password --> {token} <--  "
-    print(msg)
     try:
         mail.send(msg)
     except:
-        print("message password not sent")
-        return "errore"
+        token = "errore"
     return token
 
 @app.route('/logging', methods=["POST"])
-def logging():  # admin/admin   agent/123     agent2/123
+def logging():
     username = request.form["username"]
     password = request.form["password"]
 
@@ -306,7 +309,7 @@ def logging():  # admin/admin   agent/123     agent2/123
     cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
-        biagio = Utenti(username, generate_password_hash(password), 1)
+        biagio = Utenti(username, generate_password_hash(password), None)
         db.session.add(biagio)
         db.session.commit()
         errore = "utente non  registrato"
@@ -440,7 +443,7 @@ def adding_orders():
 def modifica_ordine():
     print("modifica ordine in modifica_ordine")
     # retrieve of the order with the form value, value is the unicode of the order
-    ordine_retrieve = Ordini.query.filter_by(codice=request.form["value"])
+    ordine_retrieve = Ordini.query.filter_by(codice=request.form["value"]).first()
 
     return render_template("modify-order.html", ordine=ordine_retrieve)
 
@@ -465,10 +468,9 @@ def elimina_ordine():
 def adding_customer():
     customer = Clienti(request.form["nome"], request.form["cognome"], request.form["via"], request.form["cap"]
                        , request.form["città"], request.form["provincia"], request.form["partita_iva"],
-                       request.form["codice_fiscale"],
-                       request.form["email"], request.form["codice_sdi"], request.form["telefono"],
-                       request.form["banca"],
-                       request.form["iban"])
+                       request.form["codice_fiscale"], request.form["email"], request.form["codice_sdi"],
+                       request.form["telefono"], request.form["banca"], request.form["iban"],
+                       request.form["ragione_sociale"])
     db.session.add(customer)
     db.session.commit()
 

@@ -2,8 +2,8 @@
     <!--SEZIONE CLIENTI-->
     <div id="sezione-clienti">
         <div class="row">
-            <div class="col-5"></div>
-            <div class="col-2" style="align-content:center">
+            <div class="col-5 col-md-5 col-lg-5"></div>
+            <div class="col-2 col-md-2 col-lg-2" style="align-content:center">
                 <button class="dritto" id="agg-cliente" onclick="http('/routing','target','aggiungi_cliente')">Aggiungi
                     nuovo cliente
                 </button>
@@ -11,7 +11,7 @@
                     cliente
                 </button>
             </div>
-            <div class="col-5"></div>
+            <div class="col-5 col-md-5 col-lg-5"></div>
         </div>
         {% if clienti== "none" %}
             <p>none</p>
@@ -21,63 +21,63 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="row">
-                                <h4 class="col-6">Nome</h4>
-                                <p class="col-6">{{ i.nome }}</p>
+                                <h4 class="col-4">Nome</h4>
+                                <p class="col-4">{{ i.nome }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Cognome</h4>
-                                <p class="col-6">{{ i.cognome }}</p>
+                                <h4 class="col-4">Cognome</h4>
+                                <p class="col-4">{{ i.cognome }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Ragione sociale</h4>
-                                <p class="col-6">{{ i.ragione_sociale }}</p>
+                                <h4 class="col-4">Ragione sociale</h4>
+                                <p class="col-4">{{ i.ragione_sociale }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Via</h4>
-                                <p class="col-6">{{ i.via }}</p>
+                                <h4 class="col-4">Via</h4>
+                                <p class="col-4">{{ i.via }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">CAP</h4>
-                                <p class="col-6">{{ i.cap }}</p>
+                                <h4 class="col-4">CAP</h4>
+                                <p class="col-4">{{ i.cap }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Città</h4>
-                                <p class="col-6">{{ i.citta }}</p>
+                                <h4 class="col-4">Città</h4>
+                                <p class="col-4">{{ i.citta }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Provincia</h4>
-                                <p class="col-6">{{ i.provincia }}</p>
+                                <h4 class="col-4">Provincia</h4>
+                                <p class="col-4">{{ i.provincia }}</p>
                             </div>
 
                         </div>
                         <div class="col-6">
                             <div class="row">
-                                <h4 class="col-6">Partita IVA</h4>
-                                <p class="col-6">{{ i.partita_iva }}</p>
+                                <h4 class="col-4">Partita IVA</h4>
+                                <p class="col-4">{{ i.partita_iva }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Codice Fiscale</h4>
-                                <p class="col-6">{{ i.codice_fiscale }}</p>
+                                <h4 class="col-4">Codice Fiscale</h4>
+                                <p class="col-4">{{ i.codice_fiscale }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Codice SDI</h4>
-                                <p class="col-6">{{ i.sdi }}</p>
+                                <h4 class="col-4">Codice SDI</h4>
+                                <p class="col-4">{{ i.sdi }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Email</h4>
-                                <p class="col-6">{{ i.email }}</p>
+                                <h4 class="col-4">Email</h4>
+                                <p class="col-4">{{ i.email }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Telefono</h4>
-                                <p class="col-6">{{ i.telefono }}</p>
+                                <h4 class="col-4">Telefono</h4>
+                                <p class="col-4">{{ i.telefono }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Banca</h4>
-                                <p class="col-6">{{ i.banca }}</p>
+                                <h4 class="col-4">Banca</h4>
+                                <p class="col-4">{{ i.banca }}</p>
                             </div>
                             <div class="row">
-                                <h4 class="col-6">Iban</h4>
-                                <p class="col-6">{{ i.iban }}</p>
+                                <h4 class="col-4">Iban</h4>
+                                <p class="col-4">{{ i.iban }}</p>
                             </div>
                         </div>
                     </div>

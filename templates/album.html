@@ -3,8 +3,8 @@
         <div class="row">
             <div class="row" style="width: 100%">
                 <div class="row" style="width: 100%">
-                    <div class="col-1 col-md-1 col-lg-1"></div>
-                    <div class="col-9 col-md-11 col-lg-11">
+                    <div class="col-2 "></div>
+                    <div class="col-10 ">
 
                         <h9 onclick="http('/routing','target','espositore')">Espositore -></h9>
 
@@ -18,7 +18,7 @@
                 <div class="row" style="width: 100%">
                     {% for i in brand.categorie %}
                         <div class="col-1 col-md-1 col-lg-1"></div>
-                        <div class="col-3 col-md-3 col-lg-3">
+                        <div class="col-3 col-md-4 col-lg-4">
                             <h2 class="dritto" style="text-transform: uppercase">{{ i.nome }}</h2>
                             <img class="dritto" height="200px" width="200px"
                                  src="{{ url_for("static",filename=i.img) }}"

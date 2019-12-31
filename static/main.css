@@ -6,11 +6,25 @@ body {
 
 }
 
+img {
+    cursor: pointer;
+}
 
+img:hover {
+    filter: brightness(120%);
+    filter: blur(50);
+}
+
+#no-effect-hover:hover {
+    filter: brightness(100%);
+    filter: blur(0);
+
+}
 
 #login input {
     width: 200px;
 }
+
 .dritto {
     display: block;
     margin: auto;
@@ -70,12 +84,12 @@ input {
 }
 
 
-
 /*-----------paragraph and header------------------*/
 .box-gray-clienti p {
     font-size: 1.0em;
     font-weight: 800;
 }
+
 h1 {
     font-size: 1em;
     font-family: 'Roboto', sans-serif;
@@ -114,7 +128,6 @@ h5 {
     text-align: center;
     margin-bottom: 0.5em;
 }
-
 
 
 .titolo {
@@ -416,10 +429,24 @@ li {
     z-index: 2;
 }
 
+#sezione-add-clienti input {
+    float: left;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#sezione-add-clienti h4 {
+    float: left;
+    text-align: right;
+    margin-bottom: 20px;
+
+}
 #sezione-clienti {
+    width: 100%;
     position: absolute;
     top: 20vh;
     left: auto;
+
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
@@ -431,7 +458,7 @@ li {
 #sezione-add-clienti {
     position: absolute;
     top: 20vh;
-    left: 0em;
+    left: 15vw;
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
@@ -443,28 +470,31 @@ li {
 
 .box-gray-clienti {
     background-color: hsla(0, 0%, 38%, 0.20);
-    width: 95vw;
+    width: 60vw;
     height: 100%;
     margin: 1em auto 1em auto;
     border-radius: 10px;
     color: black;
     font-family: 'Oxygen', sans-serif;
-    padding: 1em;
+    padding: 1em 10em 1em 10em;
     text-align: left;
     z-index: 2;
     overflow: hidden;
 }
 
+.box-gray-clienti h4, .box-gray-clienti p {
+    text-align: left;
+}
+
 .box-gray-clienti-add {
     background-color: hsla(0, 0%, 38%, 0.20);
-    width: 95vw;
+    width: 70vw;
     height: 100%;
     margin: auto;
-    border-radius: 10px;
+    border-radius: 5px;
     color: black;
     font-family: 'Oxygen', sans-serif;
-    padding: 2em;
-    text-align: left;
+    padding: 2em 1em 1em 0em;
     z-index: 2;
     position: relative;
     overflow-y: scroll;
@@ -522,7 +552,7 @@ li {
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
-    z-index: 2;
+
     overflow-y: scroll;
     overflow-x: hidden;
 }
