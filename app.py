@@ -124,8 +124,9 @@ class Gioielli_Ordinati(db.Model):
     codice_barre = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
     codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
 
-    def __init__(self, immagine, prezzo, codice_barre, codice_ordine):
-
+    def __init__(self, brand, categoria, immagine, prezzo, codice_barre, codice_ordine):
+        self.brand = brand
+        self.categoria = categoria
         self.immagine = immagine
         self.prezzo = prezzo
         self.codice_barre = codice_barre
@@ -420,6 +421,13 @@ def adding_orders():
                             request.form["pagamento"])
             db.session.add(ordine)
             db.session.commit()
+
+            for i in carrello:
+                g_ordinato = 0
+                gioiello = Gioielli.query.filter_by(codice=i)
+                g_ordinato = Gioielli_Ordinati()
+
+
             error = "ordine aggiunto correttamente in adding_orders"
 
         except:
