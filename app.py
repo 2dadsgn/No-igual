@@ -97,15 +97,17 @@ class Categorie(db.Model):
 class Ordini(db.Model):
     author = db.Column(db.String(30), db.ForeignKey('utenti.email'), nullable=False)
     codice = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.Date, nullable=False)
-    totale = db.Column(db.Float, unique=True, nullable=False)
+    data_esecuzione = db.Column(db.String(20), nullable=False)
+    data_consegna = db.Column(db.String(20), nullable=False)
+    totale = db.Column(db.Float, nullable=False)
     cliente = db.Column(db.String(), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
     pagamento = db.Column(db.String(20), nullable=False)
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
-    def __init__(self, author, data, totale, cliente, pagamento):
+    def __init__(self, author, data_esecuzione, data_consegna, totale, cliente, pagamento):
         self.author = author
-        self.data = data
+        self.data_esecuzione = data_esecuzione
+        self.data_consegna = data_consegna
         self.totale = totale
         self.cliente = cliente
         self.pagamento = pagamento
@@ -393,7 +395,7 @@ def switch_modifica_crea():
 def adding_orders():
     global carrello
     global spesa
-
+    print("entre in ordini")
     if request.form["tipo"] == "update":
         try:
             result = Ordini.query.filter_by(codice=request.form["ordine_numero"]).first()
@@ -408,43 +410,61 @@ def adding_orders():
             # da qui tramite modifica
 
             print(result)
-            return redirect(url_for("home"))
+            error = 0
         except:
+            error = 1
             print("update failed in adding_orders")
     else:
         # altrimenti è una nuova creazione col tasto crea ordini dando per scontato che il carrello
         # sia pieno!
+        print("entra in else")
 
         try:
+            print("entra")
+            prova = "2018"
             cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
-            ordine = Ordini(session["username"], request.form["data"], spesa, cliente.codice_fiscale,
+            print(cliente.codice_fiscale)
+            ordine = Ordini(session["username"], prova, request.form["data"], spesa, cliente.codice_fiscale,
                             request.form["pagamento"])
+            print("dopo creazione ordine")
             db.session.add(ordine)
             db.session.commit()
+            print("dopo inserimento")
 
+            # ciclo for per ogni codice in carello
             for i in carrello:
                 g_ordinato = 0
-                gioiello = Gioielli.query.filter_by(codice=i)
-                g_ordinato = Gioielli_Ordinati()
+                # ottengo il gioiello per codice
+                gioiello = Gioielli.query.filter_by(codice=i).first()
+                print(gioiello.brand, gioiello.categoria,
+                      gioiello.immagine, gioiello.prezzo, gioiello.codice)
+                print(ordine.codice)
+                # e inserisco il codice del gioiello originale in quelli ordinati
+                g_ordinato = Gioielli_Ordinati(gioiello.brand, gioiello.categoria,
+                                               gioiello.immagine, gioiello.prezzo, gioiello.codice,
+                                               ordine.codice)
+                db.session.commit(g_ordinato)
+                db.session.commit()
+                print("todo bien")
 
-
-            error = "ordine aggiunto correttamente in adding_orders"
+            error = 0
 
         except:
-            error = "erreo aggiunta ordine in adding_orders"
+            error = 1
 
         carrello.clear()
         spesa=0
-        print(error)
+
 
     global frase, back_to
-    frase = "ordine avvenuto con successo"
-    back_to = "ordini"
-    if session["type"] == "admin":
-
-        return redirect(url_for("routing"))
+    if error == 1:
+        frase = "errore imprevisto nell'aggiunta ordine"
     else:
-        return redirect(url_for("routing"))
+        frase = "ordine avvenuto con successo"
+
+    back_to = "ordini"
+
+    return redirect(url_for("routing"))
 
 
 @app.route('/modifica_ordine', methods=["POST"])
@@ -464,7 +484,7 @@ def elimina_ordine():
         db.session.delete(retrieved)
         db.session.commit()
 
-        cursore = Ordini.query.filter_by().all()
+        cursore = Ordini.query.all()
     except:
         print("errore in deleting in elimina_ordine ")
 
