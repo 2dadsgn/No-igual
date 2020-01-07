@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
@@ -100,7 +101,7 @@ class Ordini(db.Model):
     data_esecuzione = db.Column(db.String(20), nullable=False)
     data_consegna = db.Column(db.String(20), nullable=False)
     totale = db.Column(db.Float, nullable=False)
-    cliente = db.Column(db.String(), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
+    cliente = db.Column(db.String(30), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
     pagamento = db.Column(db.String(20), nullable=False)
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
@@ -236,6 +237,9 @@ def routing():
             ordini.append(i)
 
         ordini.reverse()
+
+        kart = []
+
     except:
         print("-- error in fetchin ordini for routing ---")
 
@@ -255,7 +259,7 @@ def routing():
 
         elif request.form["value"] == "ordini" :
             errore = "in ordini"
-            return render_template("ordini.html", ordini=ordini)
+            return render_template("ordini.html", ordini=ordini, carrello=kart)
 
         elif request.form["value"] == "espositore":
             # effettuare distinzione admin agent
@@ -393,70 +397,29 @@ def switch_modifica_crea():
 
 @app.route('/adding_orders', methods=["POST"])
 def adding_orders():
-    global carrello
-    global spesa
-    print("entre in ordini")
-    if request.form["tipo"] == "update":
-        try:
-            result = Ordini.query.filter_by(codice=request.form["ordine_numero"]).first()
-            cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
-            result.pagamento = request.form["pagamento"]
-            result.data = request.form["data"]
-            result.cliente = cliente.codice_fiscale
+    global carrello, spesa, frase, back_to
+    data_esecuzione = datetime.date.today()
+
+    try:
+        cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
+        ordine = Ordini(session["username"], data_esecuzione, request.form["data"], spesa, cliente.codice_fiscale,
+                        request.form["pagamento"])
+
+        db.session.add(ordine)
+        db.session.commit()
+
+        for i in carrello:
+            gioiello = Gioielli.query.filter_by(codice=i).first()
+            gioiello_ordinato = Gioielli_Ordinati(gioiello.brand, gioiello.categoria, gioiello.immagine,
+                                                  gioiello.prezzo, gioiello.codice, ordine.codice)
+            db.session.add(gioiello_ordinato)
             db.session.commit()
-
-            # non effettua update del carrello ma solo dati dal form
-            # ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
-            # da qui tramite modifica
-
-            print(result)
-            error = 0
-        except:
-            error = 1
-            print("update failed in adding_orders")
-    else:
-        # altrimenti è una nuova creazione col tasto crea ordini dando per scontato che il carrello
-        # sia pieno!
-        print("entra in else")
-
-        try:
-            print("entra")
-            prova = "2018"
-            cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
-            print(cliente.codice_fiscale)
-            ordine = Ordini(session["username"], prova, request.form["data"], spesa, cliente.codice_fiscale,
-                            request.form["pagamento"])
-            print("dopo creazione ordine")
-            db.session.add(ordine)
-            db.session.commit()
-            print("dopo inserimento")
-
-            # ciclo for per ogni codice in carello
-            for i in carrello:
-                g_ordinato = 0
-                # ottengo il gioiello per codice
-                gioiello = Gioielli.query.filter_by(codice=i).first()
-                print(gioiello.brand, gioiello.categoria,
-                      gioiello.immagine, gioiello.prezzo, gioiello.codice)
-                print(ordine.codice)
-                # e inserisco il codice del gioiello originale in quelli ordinati
-                g_ordinato = Gioielli_Ordinati(gioiello.brand, gioiello.categoria,
-                                               gioiello.immagine, gioiello.prezzo, gioiello.codice,
-                                               ordine.codice)
-                db.session.commit(g_ordinato)
-                db.session.commit()
-                print("todo bien")
-
-            error = 0
-
-        except:
-            error = 1
-
         carrello.clear()
-        spesa=0
+        spesa = 0
+        error = 0
+    except:
+        error = 1
 
-
-    global frase, back_to
     if error == 1:
         frase = "errore imprevisto nell'aggiunta ordine"
     else:
