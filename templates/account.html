@@ -53,6 +53,57 @@
             <div class="col-1 col-md-2 col-lg-2"></div>
         </div>
 
+        <div class="row">
+            <div class="col-1 col-md-2 col-lg-2"></div>
+
+            <!--container per creare utenti -->
+            <div class="col-10 col-md-8 col-lg-8 box-gray-account">
+                <form method="POST" action="{{ url_for("create_credentials") }}">
+                    <div class="row">
+                        <div class="col-3 col-md-3 col-lg-3 "></div>
+                        <div class="col-6 col-md-6 col-lg-6 " id="box-cta-utenti">
+                            <h5 class="dritto">Utenti registrati </h5>
+                            {% for i in utenti %}
+                                <div class="row" id="box-cta-utenti">
+                                    <div class="col-6 col-md-6 col-lg-6">
+                                        {% if i.poteri == 1 %}
+                                            <h11 style="color: red">{{ i.email }}</h11>
+                                        {% else %}
+                                            <h11 style="color: dodgerblue">{{ i.email }}</h11>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-1 col-md-1 col-lg-1"></div>
+                                    <div class="col-5 col-md-5 col-lg-5">
+                                        {% if i.approvato == 0 %}
+                                            <button class="col-5 col-md-5 col-lg-5"
+                                                    onclick="http('/approva_utente','target','{{ i.email }}')"
+                                                    id="cta-utenti" style="color: green">Abilita
+                                            </button>
+                                        {% else %}
+                                            <button id="cta-utenti" class="col-5 col-md-5 col-lg-5"
+                                                    onclick="http('/approva_utente','target','{{ i.email }}')"
+                                                    id="cta-utenti" style="color: red">Disabilita
+                                            </button>
+                                        {% endif %}
+                                        <div class="col-auto col-md-auto col-lg-auto"></div>
+                                        <button id="cta-utenti" class="col-5 col-md-5 col-lg-5"
+                                                onclick="http('/rimuovi_utente','target','{{ i.email }}')"
+                                                id="cta-utenti" style="color: red">Rimuovi
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                        <div class="col-3 col-md-3 col-lg-3 "></div>
+
+                    </div>
+                </form>
+            </div>
+            <!--fine container -->
+            <div class="col-1 col-md-2 col-lg-2"></div>
+        </div>
+
 
     </div>
     <!--FINE SEZIONE ACCOUNT-->

@@ -36,13 +36,15 @@ mail = Mail(app)
 class Utenti(db.Model):
     email = db.Column(db.String(20), primary_key=True, nullable=False)
     password = db.Column(db.String(12), nullable=False)
-    poteri = db.Column(db.Integer, nullable=True, default=0)
+    poteri = db.Column(db.Integer, default=0)
+    approvato = db.Column(db.Integer, default=0)
     ordini = db.relationship('Ordini', backref='utente', lazy=True)
 
-    def __init__(self, email, password, poteri):
+    def __init__(self, email, password, poteri, approvato):
         self.email = email
         self.password = password
         self.poteri = poteri
+        self.approvato = approvato
 
 
 # gioielli------------
@@ -238,10 +240,17 @@ def routing():
 
         ordini.reverse()
 
-
-
     except:
         print("-- error in fetchin ordini for routing ---")
+
+    try:
+        # lista utenti
+        if session["type"] == "admin":
+            utenti = Utenti.query.all()
+
+    except:
+        print("-- error in fetchin utenti for routing ---")
+
 
 
 
@@ -268,7 +277,7 @@ def routing():
         elif request.form["value"] == "account":
             utente = Utenti.query.filter_by(email=session["username"]).first()
             if utente.poteri == 1:
-                return render_template("account.html")
+                return render_template("account.html", utenti=utenti)
             else:
                 frase = "Non si dispone delle autorizzazioni necessarie"
                 back_to = "espositore"
@@ -299,6 +308,10 @@ def routing():
         elif session["username"] == "" or session["username"] == None :
             render_template("home.html")
 
+    if frase == "Benvenuto" and session["username"]:
+        frase = "Benvenuto " + session["username"]
+    elif session["username"] == "" or session["username"] == None:
+        render_template("home.html")
     return render_template("welcome.html", frase=frase, back_to=back_to)
 
 
@@ -319,6 +332,7 @@ def sending_email(destinatario):
 
 @app.route('/logging', methods=["POST"])
 def logging():
+    global frase, back_to
     username = request.form["username"]
     password = request.form["password"]
 
@@ -326,28 +340,78 @@ def logging():
     cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
-        biagio = Utenti(username, generate_password_hash(password), None)
+        biagio = Utenti(username, generate_password_hash(password), 0, 0)
         db.session.add(biagio)
         db.session.commit()
-        errore = "utente non  registrato"
+        errore = "utente non  registrato,<br> in attesa di approvazione"
         return render_template('home.html', error_name=errore)
 
     else:
-        if check_password_hash(cursore.password, password):
+        if cursore.approvato == 0:
+            errore = "utente non ancora approvato"
+            return render_template('home.html', error_pass=errore)
+
+        elif check_password_hash(cursore.password, password):
             if cursore.poteri == 1:
                 tipo_utente = "admin"
                 session["type"] = "admin"
                 session["username"] = request.form["username"]
+                frase = "Benvenuto"
+                back_to = "null"
                 return redirect(url_for("routing"))  # call the method home to load fresh data on access
 
             else:
                 tipo_utente = "rappresentante"
                 session["type"] = "agent"
                 session["username"] = request.form["username"]
+                frase = "Benvenuto"
+                back_to = "null"
                 return redirect(url_for("routing"))  # call the method home to load fresh data on access
         else:
             errore = "password errata"
             return render_template('home.html', error_pass=errore)
+
+
+@app.route('/approva_utente', methods=["POST"])
+def approvva_utente():
+    global frase, back_to
+    try:
+        utente = Utenti.query.filter_by(email=request.form["value"]).first()
+        if utente.approvato == 0:
+            valore = "abilitato"
+            utente.approvato = 1
+        else:
+            valore = "disabilitato"
+            utente.approvato = 0
+        db.session.commit()
+
+    except:
+        print("errore in approvazione/disapprovazione utente")
+        frase = "Errore in /approva_utente "
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+    frase = f"utente {valore} con successo"
+    back_to = "account"
+    return redirect(url_for("routing"))
+
+
+@app.route('/rimuovi_utente', methods=["POST"])
+def rimuovi_utente():
+    global frase, back_to
+    try:
+        utente = Utenti.query.filter_by(email=request.form["value"]).first()
+        db.session.delete(utente)
+        db.session.commit()
+    except:
+        print("errore eliminazione utente")
+        frase = "Errore in eliminazione_utente "
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+    frase = f"utente rimosso con successo"
+    back_to = "account"
+    return redirect(url_for("routing"))
 
 
 @app.route('/create_credentials', methods=["POST"])

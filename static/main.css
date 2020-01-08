@@ -397,6 +397,20 @@ li {
     text-align: center;
 }
 
+#sezione-account #cta-utenti, #sezione-account h11 {
+    display: inline;
+
+}
+
+#sezione-account #cta-utenti {
+    float: right !important;
+    text-align: center;
+}
+
+#box-cta-utenti {
+
+    margin-bottom: 20px;
+}
 #sezione-account p {
     color: red;
 }
