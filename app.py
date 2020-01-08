@@ -213,7 +213,7 @@ def index():
 
 @app.route('/routing', methods=["POST", "GET"])
 def routing():
-    global indice_ordini, carrello, spesa  # aggiunta qui ultimamente spesa
+    global indice_ordini, carrello, spesa, frase, back_to  # aggiunta qui ultimamente spesa
     try:
         # lista di brand
         brand = Brand.query.all()
@@ -266,7 +266,12 @@ def routing():
             return render_template("manage_admin.html", nomi_brand=brand)
 
         elif request.form["value"] == "account":
-            return render_template("account.html")
+            utente = Utenti.query.filter_by(email=session["username"]).first()
+            if utente.poteri == 1:
+                return render_template("account.html")
+            else:
+                frase = "Non si dispone delle autorizzazioni necessarie"
+                back_to = "espositore"
 
         elif request.form["value"] == "upload":
             return render_template("upload.html")
@@ -286,7 +291,7 @@ def routing():
 
 
     except:
-        global frase, back_to  #aggiunta qui ultimamente di back to
+
         print("nessuna frase in routing")
 
         if frase == "null" and session["username"]:

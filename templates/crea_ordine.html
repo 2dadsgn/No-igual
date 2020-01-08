@@ -63,7 +63,7 @@
                 <h4 class="col-12 dritto">Codici articoli:</h4>
                 {% for i in carrello %}
                     <p class="col-2">{{ i.codice }}</p>
-                    <img class="col-2" height="80px" width="80px"
+                    <img class="col-2" height="100px" width="100px"
                          src="{{ url_for("static",filename=i.immagine) }}">
                 {% endfor %}
             </div>
