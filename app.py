@@ -213,7 +213,7 @@ def index():
 
 @app.route('/routing', methods=["POST", "GET"])
 def routing():
-    global indice_ordini
+    global indice_ordini, carrello, spesa  # aggiunta qui ultimamente spesa
     try:
         # lista di brand
         brand = Brand.query.all()
@@ -238,7 +238,7 @@ def routing():
 
         ordini.reverse()
 
-        kart = []
+
 
     except:
         print("-- error in fetchin ordini for routing ---")
@@ -259,7 +259,7 @@ def routing():
 
         elif request.form["value"] == "ordini" :
             errore = "in ordini"
-            return render_template("ordini.html", ordini=ordini, carrello=kart)
+            return render_template("ordini.html", ordini=ordini)
 
         elif request.form["value"] == "espositore":
             # effettuare distinzione admin agent
@@ -275,13 +275,18 @@ def routing():
             return render_template("modify-order.html")
         #crea ordine
         elif request.form["value"] == "crea_ordine":
+            gioielli_carrello = []
+            for i in carrello:
+                temp = Gioielli.query.filter_by(codice=i).first()
+                gioielli_carrello.append(temp)
 
-            return render_template("crea_ordine.html", clienti=customers, carrello=carrello, totale=spesa)
+            return render_template("crea_ordine.html", clienti=customers, carrello=gioielli_carrello, totale=spesa)
+
         print("non trova nessun route da soddisfare in function routing")
 
 
     except:
-        global frase
+        global frase, back_to  #aggiunta qui ultimamente di back to
         print("nessuna frase in routing")
 
         if frase == "null" and session["username"]:
@@ -434,22 +439,35 @@ def adding_orders():
 def modifica_ordine():
     print("modifica ordine in modifica_ordine")
     # retrieve of the order with the form value, value is the unicode of the order
-    ordine_retrieve = Ordini.query.filter_by(codice=request.form["value"]).first()
+    ordine = Ordini.query.filter_by(codice=request.form["value"]).first()
+    clienti = Clienti.query.all()
 
-    return render_template("modify-order.html", ordine=ordine_retrieve)
+    return render_template("modify-order.html", ordine=ordine, clienti=clienti)
+
+
+@app.route('/modifica!', methods=["POST"])
+def modifica_ordine_effetttuata():
+    # retrieve of the order with the form value, value is the unicode of the order
+    ordine = Ordini.query.filter_by(codice=request.form["codice"]).first()
+    ordine.data = request.form["data"]
+    ordine.pagamento = request.form["pagamento"]
+    ordine.cliente = request.form["cliente"]
+
+    return render_template("modify-order.html", ordine=ordine)
 
 
 @app.route('/elimina_ordine', methods=['POST'])
 def elimina_ordine():
 
     try:
-        retrieved = Ordini.query.filter_by(codice=request.form["value"]).first()
-        db.session.delete(retrieved)
+        print(request.form["value"])
+        Ordini.query.filter_by(codice=request.form["value"]).delete()
         db.session.commit()
 
-        cursore = Ordini.query.all()
+
     except:
         print("errore in deleting in elimina_ordine ")
+    cursore = Ordini.query.filter_by().all()
 
     return render_template("ordini.html", ordini=cursore)
 
@@ -471,8 +489,7 @@ def adding_customer():
 # rimozione cliente nel db
 @app.route('/removing_customer', methods=['POST'])
 def removing_customer():
-    retrieved = Clienti.query.filter_by(ragione_sociale=request.form["cliente-da-eliminare"]).first()
-    db.session.delete(retrieved)
+    Clienti.query.filter_by(ragione_sociale=request.form["cliente-da-eliminare"]).delete()
     db.session.commit()
 
     return render_template("welcome.html", frase="Cliente rimosso", back_to="clienti")

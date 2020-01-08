@@ -16,7 +16,7 @@
                 {% else %}
                     <div class="col-md-8 box-gray-ordini" method="post">
                         <div class="row">
-                            <div class="col-12">
+                            <div class="col-10">
                                 <div class="row">
                                     <h4 class="col-6">Ordine numero:</h4>
                                     <p class="col-6">{{ i.codice }}</p>
@@ -32,19 +32,31 @@
                                     <p class="col-6">{{ i.pagamento }}</p>
                                 </div>
                                 <div class="row">
-                                    <h4 class="col-6">Pagamento:</h4>
+                                    <h4 class="col-6">Data consegna prevista:</h4>
                                     <p class="col-6">{{ i.data_consegna }}</p>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-6">Data crezione:</h4>
+                                    <p class="col-6">{{ i.data_esecuzione }}</p>
                                 </div>
                                 <div class="row">
                                     <h4 class="col-6">Totale:</h4>
                                     <p class="col-6">{{ i.totale }}</p>
                                 </div>
                             </div>
+                            <div class="col-2"></div>
                             <div class="col-12">
                                 <div class="row">
-                                    <h4 class="col-6">Codici articoli:</h4>
-                                    {% for c in i["carrello"] %}
-                                        <p class="col-2">{{ c }}</p>
+                                    <div class="col-12">
+                                        <div class="col-5 col-md-5 col-lg-5">
+                                            <h4 class=" dritto">Codici articoli:</h4>
+                                        </div>
+                                        <div class="col-7 col-md-7 col-lg7"></div>
+                                    </div>
+
+                                    {% for c in i.carrello %}
+                                        <div class="col-1 col-md-1 col-lg-1"></div>
+                                        <p class="col-2 col-md-3 col-lg-3">{{ c.codice_barre }}</p>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -52,9 +64,9 @@
                         <div class="row">
                             <div class="controls">
                                 <button id="modify"
-                                        onclick="http('/modifica_ordine','target',{{ i["ordine_numero"] }})"> Modifica
+                                        onclick="http('/modifica_ordine','target',{{ i.codice }})"> Modifica
                                 </button>
-                                <button id="delete" onclick="http('/elimina_ordine','target',{{ i["ordine_numero"] }})">
+                                <button id="delete" onclick="http('/elimina_ordine','target',{{ i.codice }})">
                                     Elimina
                                 </button>
                             </div>
