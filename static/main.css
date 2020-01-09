@@ -3,7 +3,6 @@
 body {
     padding: 20vh 0 0 0;
     font-size: 15px;
-
 }
 
 img {
@@ -571,13 +570,16 @@ li {
 }
 
 #sezione-crea-ordine {
-    position: fixed;
+    position: absolute;
     top: 10em;
     left: auto;
     transition-property: all;
     transition-timing-function: ease-in-out;
     transition-duration: 800ms;
     z-index: 2;
+    overflow: hidden;
+    padding: 1em;
+
 }
 
 #sezione-ordini h4 {

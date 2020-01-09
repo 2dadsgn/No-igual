@@ -1,6 +1,7 @@
 import datetime
 import os
 
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -521,6 +522,7 @@ def modifica_ordine_effetttuata():
     ordine.data = request.form["data"]
     ordine.pagamento = request.form["pagamento"]
     ordine.cliente = request.form["cliente"]
+    db.session.commit()
 
     return render_template("modify-order.html", ordine=ordine)
 
@@ -529,17 +531,40 @@ def modifica_ordine_effetttuata():
 def elimina_ordine():
 
     try:
-        print(request.form["value"])
+
         Ordini.query.filter_by(codice=request.form["value"]).delete()
         db.session.commit()
 
 
     except:
         print("errore in deleting in elimina_ordine ")
-    cursore = Ordini.query.filter_by().all()
+
+    try:
+        if session["type"] == "admin":
+            cursore = Ordini.query.filter_by().all()
+        else:
+            cursore = Ordini.query.filter_by(author=session["username"]).all()
+    except:
+        print ("errore in fetchin ordini dopo eliminazione ordine")
 
     return render_template("ordini.html", ordini=cursore)
 
+
+@app.route('/svuota_carrello', methods=['POST'])
+def svuota_carrello():
+    global carrello, spesa
+    carrello.clear()
+    spesa = 0
+
+    try:
+        if session["type"] == "admin":
+            cursore = Ordini.query.filter_by().all()
+        else:
+            cursore = Ordini.query.filter_by(author=session["username"]).all()
+    except:
+        print ("errore in fetchin ordini dopo eliminazione ordine")
+
+    return render_template("ordini.html", ordini=cursore)
 
 # aggiunta cliente nel db
 @app.route('/adding_customer', methods=['POST'])
