@@ -216,6 +216,7 @@ back_to = "null"
 prev = []
 
 
+
 @app.route('/')
 def index():
     return render_template("home.html")
@@ -703,24 +704,51 @@ def upload_file():
     return render_template("welcome.html", frase="Errore in upload file")
 
 
-@app.route('/modifica_oggetto', methods=['POST'])
-def modifica_oggetto():
-    gioiello = Gioielli.query.filter_by(codice=request.form["codice"]).first()
+@app.route('/ricerca_oggetto', methods=['POST'])
+def ricerca_oggetto():
+    global trovato, back_to, frase
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["codice"]).first()
+
+    except:
+        frase = "Ricerca fallita, oggetto non trovavato"
+        back_to = "account"
+        return redirect(url_for('routing'))
 
     return render_template("modifica_oggetto.html", gioiello=gioiello)
+
+
+@app.route('/elimina_oggetto', methods=['POST'])
+def elimina_oggetto():
+    global frase, back_to
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["value"]).delete()
+        frase = "eliminazione avvenuta con successo"
+        back_to = "espositore"
+        db.session.commit()
+
+    except:
+        frase = "eliminazione non avvenuta"
+        back_to = "espositore"
+
+    return redirect(url_for("routing"))
 
 
 @app.route('/effettua_modifica_oggetto', methods=['POST'])
 def effettua_modifica_oggetto():
     global frase, back_to
 
-    gioiello = Gioielli.query.filter_by(codice=request.form["vecchio_codice"]).first()
-    gioiello.prezzo = request.form["prezzo"]
-    gioiello.codice = request.form["codice"]
-    db.session.commit()
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["vecchio_codice"]).first()
+        gioiello.prezzo = request.form["prezzo"]
+        gioiello.codice = request.form["codice"]
+        db.session.commit()
+        frase = "modifica avvenuta con successo"
+        back_to = "espositore"
+    except:
+        frase = "errore"
+        back_to = "espositore"
 
-    frase = "modifica avvenuta con successo"
-    back_to = "espositore"
 
     return redirect(url_for("routing"))
 
@@ -818,10 +846,137 @@ def svuota_carrello():
 
 def stampa(ordine_numero):
     try:
+        ordine = Ordini.query.filter_by(codice=ordine_numero).first()
+        gioielli_ordinati = Gioielli_Ordinati.query.filter_by(codice_ordine=ordine_numero).all()
+        cliente = Clienti.query.filter_by(codice_fiscale=ordine.cliente).first()
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="Welcome to Python!", ln=1, align="C")
+        pdf.set_font("times", size=25)
+        pdf.cell(40, 10, txt=f"No igual gioielli", ln=0, align="L")
+        pdf.set_font("times", size=12)
+        pdf.cell(100, 10, txt=f"ordine richiesto da {cliente.ragione_sociale}", ln=1, align="R")
+        pdf.cell(140, 10, txt=f"ORDINE numero #{ordine_numero}", ln=1, align="R")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+        pdf.cell(200, 3, txt=f"Articoli ordinati: ", ln=1, align="C")
+        pdf.cell(200, 2, txt="________________________________________________________________________________", ln=1,
+                 align="C")
+        pdf.cell(65, 5, txt=f" ", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"codice", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"quantita", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"prezzo", ln=1, align="C")
+        pdf.cell(200, 5, txt="_________________________________________________________________", ln=1, align="C")
+        for i in gioielli_ordinati:
+            pdf.cell(65, 5, txt=f" ", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.codice_barre}", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.quantita}", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.prezzo}", ln=1, align="C")
+            pdf.cell(200, 5, txt="_________________________________________________________________", ln=1, align="C")
+        pdf.cell(10, 10, txt="", ln=0, align="L")
+        pdf.cell(100, 10, txt=f"Data creazione ordine {ordine.data_esecuzione}", ln=0, align="L")
+        pdf.cell(80, 10, txt=f"Data consegna prevista {ordine.data_consegna}", ln=1, align="R")
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+        pdf.cell(180, 10, txt=f"TOTALE - {ordine.totale} Euro", ln=1, align="R")
+        pdf.cell(200, 2, txt="___________________________________________________________________________________",
+                 ln=1, align="C")
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        pdf.add_page()
+        pdf.cell(200, 2, txt="Dati del cliente", ln=1, align="C")
+
+        pdf.cell(200, 20, txt=" ", ln=1, align="C")
+        # prima riga
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Nome", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.nome}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Cognome", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.cognome}", ln=1, align="LL")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # seconda riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Codice Fiscale", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.codice_fiscale}", ln=0, align="LL")
+
+        pdf.cell(40, 2, txt="Ragione sociale", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.ragione_sociale}", ln=1, align="LL")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # terza riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Via", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.via}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="CAP", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.cap}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quarta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Città", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.citta}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Provincia", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.provincia}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quinta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Partita IVA", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.partita_iva}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Codice SDI", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.codice_sdi}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quinta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(20, 2, txt="Email", ln=0, align="L")
+        pdf.cell(60, 2, txt=f"{cliente.email}", ln=0, align="L")
+
+        pdf.cell(20, 2, txt="Pec", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.email_pec}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # SESTA riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Telefono", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.telefono}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Banca", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.banca}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # settima riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="IBAN", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.iban}", ln=1, align="L")
+
+
+
         pdf.output(f"static/{ordine_numero}.pdf")
     except:
         print ("pdf creation failed")

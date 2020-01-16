@@ -29,13 +29,13 @@
             <div class="col-1 col-md-2 col-lg-2"></div>
 
             <div class="col-10 col-md-8 col-lg-8 box-gray-account">
-                <form enctype="multipart/form-data" method="post" action="{{ url_for('modifica_oggetto') }}">
+                <form enctype="multipart/form-data" method="post" action="{{ url_for('ricerca_oggetto') }}">
                     <div class="row">
                         <div class="col-12 col-md-12 col-lg-12 ">
-                            <h5 class="dritto">Modifica gioiello</h5>
+                            <h5 class="dritto">Ricerca gioiello</h5>
                             <h4 class="dritto">Inserisci codice </h4>
                             <input class="dritto" type="text" name="codice" value="">
-                            <input class="dritto" type="submit" value="Ricerca">
+                            <button class="dritto" type="submit">Ricerca</button>
                         </div>
                     </div>
                 </form>
