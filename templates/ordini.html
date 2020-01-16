@@ -56,7 +56,8 @@
 
                                     {% for c in i.carrello %}
                                         <div class="col-1 col-md-1 col-lg-1"></div>
-                                        <p class="col-2 col-md-3 col-lg-3">{{ c.codice_barre }}</p>
+                                        <p class="col-2 col-md-3 col-lg-3"><b>{{ c.codice_barre }}</b>
+                                            (x{{ c.quantita }})</p>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -68,6 +69,12 @@
                                 </button>
                                 <button id="delete" onclick="http('/elimina_ordine','target',{{ i.codice }})">
                                     Elimina
+                                </button>
+                                <a href="{{ url_for("static",filename=i.codice) }}.pdf" download>
+                                    <button id="stampa">Salva</button>
+                                </a>
+                                <button id="invia" onclick="http('/invia_email_cliente','target',{{ i.codice }})">
+                                    Invia
                                 </button>
                             </div>
 

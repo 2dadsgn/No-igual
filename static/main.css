@@ -285,6 +285,12 @@ li {
 }
 
 /*--------------------------------------------------*/
+/*----------------------modifica oggetto---------------------*/
+#modifica_oggetto input, #modifica_oggetto button {
+    display: block;
+    align-content: center;
+    margin: 2vh auto 2vh auto;
+}
 /*-----------------------ESPOSITORE------------------*/
 #sezione-espositore {
     top: 1em;
@@ -662,12 +668,24 @@ li {
 
 #delete {
     position: absolute;
-    top: 70px;
+    top: 50px;
+    left: -100px;
+}
+
+#invia {
+    position: absolute;
+    top: 100px;
+    left: -100px;
+}
+
+#stampa {
+    position: absolute;
+    top: 150px;
     left: -100px;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 #sezione-crea-ordine input, select {

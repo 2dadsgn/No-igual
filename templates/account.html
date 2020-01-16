@@ -24,10 +24,31 @@
             <div class="col-1 col-md-2 col-lg-2"></div>
         </div>
 
+        <!--container modifica oggetti -->
         <div class="row">
             <div class="col-1 col-md-2 col-lg-2"></div>
 
-            <!--container per creare utenti -->
+            <div class="col-10 col-md-8 col-lg-8 box-gray-account">
+                <form enctype="multipart/form-data" method="post" action="{{ url_for('modifica_oggetto') }}">
+                    <div class="row">
+                        <div class="col-12 col-md-12 col-lg-12 ">
+                            <h5 class="dritto">Modifica gioiello</h5>
+                            <h4 class="dritto">Inserisci codice </h4>
+                            <input class="dritto" type="text" name="codice" value="">
+                            <input class="dritto" type="submit" value="Ricerca">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-1 col-md-2 col-lg-2"></div>
+        </div>
+        <!--fine container -->
+
+        <!--container per creare utenti -->
+        <div class="row">
+            <div class="col-1 col-md-2 col-lg-2"></div>
+
+
             <div class="col-10 col-md-8 col-lg-8 box-gray-account">
                 <form method="POST" action="{{ url_for("create_credentials") }}">
                     <div class="row">
@@ -53,10 +74,11 @@
             <div class="col-1 col-md-2 col-lg-2"></div>
         </div>
 
+        <!--container per gestire utenti -->
         <div class="row">
             <div class="col-1 col-md-2 col-lg-2"></div>
 
-            <!--container per creare utenti -->
+
             <div class="col-10 col-md-8 col-lg-8 box-gray-account">
                 <form method="POST" action="{{ url_for("create_credentials") }}">
                     <div class="row">
@@ -75,18 +97,18 @@
                                     <div class="col-1 col-md-1 col-lg-1"></div>
                                     <div class="col-5 col-md-5 col-lg-5">
                                         {% if i.approvato == 0 %}
-                                            <button class="col-5 col-md-5 col-lg-5"
+                                            <button class="col-6 col-md-5 col-lg-5"
                                                     onclick="http('/approva_utente','target','{{ i.email }}')"
                                                     id="cta-utenti" style="color: green">Abilita
                                             </button>
                                         {% else %}
-                                            <button id="cta-utenti" class="col-5 col-md-5 col-lg-5"
+                                            <button id="cta-utenti" class="col-6 col-md-5 col-lg-5"
                                                     onclick="http('/approva_utente','target','{{ i.email }}')"
                                                     id="cta-utenti" style="color: red">Disabilita
                                             </button>
                                         {% endif %}
                                         <div class="col-auto col-md-auto col-lg-auto"></div>
-                                        <button id="cta-utenti" class="col-5 col-md-5 col-lg-5"
+                                        <button id="cta-utenti" class="col-6 col-md-5 col-lg-5"
                                                 onclick="http('/rimuovi_utente','target','{{ i.email }}')"
                                                 id="cta-utenti" style="color: red">Rimuovi
                                         </button>

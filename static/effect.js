@@ -103,6 +103,9 @@ function rifoca() {
 /* AJAX REQUEST for albums*/
 function http(url, target, value) {
     console.log("GET me " + url + " to " + target + " " + value);
+    if (url == "/svuota_carrello") {
+        document.getElementById("cart").innerHTML = "€"
+    }
     const Http = new XMLHttpRequest();
     var qui = document.getElementById(target);
     Http.onreadystatechange = function () {
@@ -120,6 +123,8 @@ function http(url, target, value) {
 
 /* AJAX REQUEST for albums*/
 function http_cart(url, codice) {
+
+
     if (url == "/add_to_cart") {
         document.getElementById(codice + "radio").checked = true;
     } else {
@@ -127,15 +132,14 @@ function http_cart(url, codice) {
     }
     id_codice = '#' + codice + "quantita";
     prezzo_codice = codice + "prezzo";
-    let quantita = $(id_codice).val();
-    let prezzo = document.getElementById(prezzo_codice).innerHTML;
+    var quantita = $(id_codice).val();
+    var prezzo = document.getElementById(prezzo_codice).innerHTML;
     prezzo = prezzo.replace(",", ".");
 
-    let data = [codice, quantita, prezzo];
-
-
+    var data = [codice, quantita, prezzo];
     const Http = new XMLHttpRequest();
     var qui = document.getElementById("cart");
+
 
     Http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -146,6 +150,8 @@ function http_cart(url, codice) {
         }
 
     }
+
+
     Http.open("POST", url, true);
     Http.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
     Http.send("data=" + data);

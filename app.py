@@ -1,10 +1,9 @@
 import datetime
 import os
-
-
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
+from fpdf import FPDF
 from random_password import random_password
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -13,6 +12,8 @@ UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
+mail = Mail(app)
+
 # config for the upload folder
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -127,16 +128,18 @@ class Gioielli_Ordinati(db.Model):
     categoria = db.Column(db.Integer, db.ForeignKey('categorie.unicode'), nullable=False)
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
+    quantita = db.Column(db.Integer, default=1)
     codice_barre = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
     codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
 
-    def __init__(self, brand, categoria, immagine, prezzo, codice_barre, codice_ordine):
+    def __init__(self, brand, categoria, immagine, prezzo, codice_barre, codice_ordine, quantita):
         self.brand = brand
         self.categoria = categoria
         self.immagine = immagine
         self.prezzo = prezzo
         self.codice_barre = codice_barre
         self.codice_ordine = codice_ordine
+        self.quantita = quantita
 # -------------------------
 
 
@@ -150,15 +153,16 @@ class Clienti(db.Model):
     provincia = db.Column(db.String(4), nullable=False)
     partita_iva = db.Column(db.String(30), nullable=False, unique=True)
     codice_fiscale = db.Column(db.String(40), primary_key=True)
-    email = db.Column(db.String(30), nullable=False)
+    email = db.Column(db.String(30), nullable=True)
+    email_pec = db.Column(db.String(30), nullable=True)
     codice_sdi = db.Column(db.String(30), nullable=False)
-    telefono = db.Column(db.Integer, nullable=False)
+    telefono = db.Column(db.String(30), nullable=False)
     banca = db.Column(db.String(30), nullable=False)
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
     ordini = db.relationship('Ordini', backref='ordinato_da', lazy=True)
 
-    def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, codice_sdi,
+    def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, pec, codice_sdi,
                  telefono, banca, iban, ragione_sociale):
         self.nome = nome
         self.cognome = cognome
@@ -174,6 +178,7 @@ class Clienti(db.Model):
         self.banca = banca
         self.iban = iban
         self.ragione_sociale = ragione_sociale
+        self.email_pec = pec
 
 # -------------------------
 
@@ -199,7 +204,9 @@ categoria_attuale = "none"
 carrello = []
 
 # quantity
-quantity = []
+quantity = {
+    " ": None
+}
 
 # global per routing
 frase = "null"
@@ -290,24 +297,24 @@ def routing():
             return render_template("modify-order.html")
         #crea ordine
         elif request.form["value"] == "crea_ordine":
+            # c'è un errore in fetchin con codice a barre perchè gioielli ordinati unicode non barre
             gioielli_carrello = []
+            gioielli_carrello.clear()
             for i in carrello:
                 temp = Gioielli.query.filter_by(codice=i).first()
                 gioielli_carrello.append(temp)
 
-            return render_template("crea_ordine.html", clienti=customers, carrello=gioielli_carrello, totale=spesa)
+            return render_template("crea_ordine.html", clienti=customers, carrello=gioielli_carrello,
+                                   quantita=quantity, totale=spesa)
 
         print("non trova nessun route da soddisfare in function routing")
 
 
     except:
 
-        print("nessuna frase in routing")
+        print("nessun route richiesto")
 
-        if frase == "null" and session["username"]:
-            frase = "Benvenuto " + session["username"]
-        elif session["username"] == "" or session["username"] == None :
-            render_template("home.html")
+
 
     if frase == "Benvenuto" and session["username"]:
         frase = "Benvenuto " + session["username"]
@@ -316,20 +323,7 @@ def routing():
     return render_template("welcome.html", frase=frase, back_to=back_to)
 
 
-def sending_email(destinatario):
-    token = random_password(length=6,
-                            characters=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'a', 'b', 'c', 'd', 'e',
-                                        'f'
-                                , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
-                                , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
-    msg = Message('Accesso credenziali', sender='provaprovaprova52@virgilio.it', recipients=destinatario)
-    msg.body = f"ciao  {destinatario} , conserva queste informazioni accuratamente,ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No Igual gioielli, questa è la tua password --> {token} <--  "
-    try:
-        mail.send(msg)
-    except:
-        token = "errore"
-    return token
 
 @app.route('/logging', methods=["POST"])
 def logging():
@@ -344,7 +338,7 @@ def logging():
         biagio = Utenti(username, generate_password_hash(password), 0, 0)
         db.session.add(biagio)
         db.session.commit()
-        errore = "utente non  registrato,<br> in attesa di approvazione"
+        errore = "utente registrato, in attesa di approvazione"
         return render_template('home.html', error_name=errore)
 
     else:
@@ -415,6 +409,25 @@ def rimuovi_utente():
     return redirect(url_for("routing"))
 
 
+def sending_email(destinatario):
+    try:
+        token = random_password(length=6,
+                                characters=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'a', 'b', 'c', 'd',
+                                            'e',
+                                            'f'
+                                    , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
+                                    , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+
+        msg = Message('Accesso credenziali', sender='provaprovaprova52@virgilio.it', recipients=[f"{destinatario}"])
+        msg.body = f"""ciao  {destinatario} , conserva queste informazioni accuratamente,
+            ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No 
+            Igual gioielli, questa è la tua password --> {token} <--  """
+        mail.send(msg)
+    except:
+        token = "errore"
+    return token
+
+
 @app.route('/create_credentials', methods=["POST"])
 def create_credentials():  #function per creare credenziali da pannello ADMIN
     global frase, back_to
@@ -426,7 +439,7 @@ def create_credentials():  #function per creare credenziali da pannello ADMIN
                 frase = "errore nell'invio del messaggio password email"
                 back_to = "account"
                 return redirect(url_for("routing"))
-            new_utente = Utenti(request.form["email"], generate_password_hash(password_generata))
+            new_utente = Utenti(request.form["email"], generate_password_hash(password_generata), 0, 1)
             db.session.add(new_utente)
             db.session.commit()
 
@@ -475,26 +488,35 @@ def adding_orders():
     global carrello, spesa, frase, back_to
     data_esecuzione = datetime.date.today()
 
+
     try:
         cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
         ordine = Ordini(session["username"], data_esecuzione, request.form["data"], spesa, cliente.codice_fiscale,
                         request.form["pagamento"])
 
         db.session.add(ordine)
+
         db.session.commit()
+        t =0
 
         for i in carrello:
             gioiello = Gioielli.query.filter_by(codice=i).first()
             gioiello_ordinato = Gioielli_Ordinati(gioiello.brand, gioiello.categoria, gioiello.immagine,
-                                                  gioiello.prezzo, gioiello.codice, ordine.codice)
+                                                  gioiello.prezzo, gioiello.codice, ordine.codice, quantity[i])
+
             db.session.add(gioiello_ordinato)
             db.session.commit()
+            t = t +1
         carrello.clear()
+        quantity.clear()
         spesa = 0
         error = 0
     except:
         error = 1
-
+    ordine = Ordini.query.all()
+    for i in ordine:
+        i
+    stampa(i.codice)
     if error == 1:
         frase = "errore imprevisto nell'aggiunta ordine"
     else:
@@ -533,7 +555,11 @@ def elimina_ordine():
     try:
 
         Ordini.query.filter_by(codice=request.form["value"]).delete()
+
+        while Gioielli_Ordinati.query.filter_by(codice_ordine=request.form["value"]).all():
+            Gioielli_Ordinati.query.filter_by(codice_ordine=request.form["value"]).delete()
         db.session.commit()
+
 
 
     except:
@@ -541,37 +567,30 @@ def elimina_ordine():
 
     try:
         if session["type"] == "admin":
-            cursore = Ordini.query.filter_by().all()
+            cursore = Ordini.query.filter_by(author=session["username"]).all()
         else:
             cursore = Ordini.query.filter_by(author=session["username"]).all()
     except:
         print ("errore in fetchin ordini dopo eliminazione ordine")
 
-    return render_template("ordini.html", ordini=cursore)
+    tmp = []
+    tmp.clear()
+    for i in cursore:
+        tmp.append(i)
+    tmp.reverse()
+
+    return render_template("ordini.html", ordini=tmp)
 
 
-@app.route('/svuota_carrello', methods=['POST'])
-def svuota_carrello():
-    global carrello, spesa
-    carrello.clear()
-    spesa = 0
 
-    try:
-        if session["type"] == "admin":
-            cursore = Ordini.query.filter_by().all()
-        else:
-            cursore = Ordini.query.filter_by(author=session["username"]).all()
-    except:
-        print ("errore in fetchin ordini dopo eliminazione ordine")
-
-    return render_template("ordini.html", ordini=cursore)
 
 # aggiunta cliente nel db
 @app.route('/adding_customer', methods=['POST'])
 def adding_customer():
     customer = Clienti(request.form["nome"], request.form["cognome"], request.form["via"], request.form["cap"]
                        , request.form["città"], request.form["provincia"], request.form["partita_iva"],
-                       request.form["codice_fiscale"], request.form["email"], request.form["codice_sdi"],
+                       request.form["codice_fiscale"], request.form["email"], request.form["email_pec"],
+                       request.form["codice_sdi"],
                        request.form["telefono"], request.form["banca"], request.form["iban"],
                        request.form["ragione_sociale"])
     db.session.add(customer)
@@ -598,61 +617,61 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
-    # se il brand esiste già
-    if Brand.query.filter_by(nome=request.form["brand"]).first():
-        # se la categoria esiste già effettua update gioielli match su codice
-        if Categorie.query.filter_by(brand=request.form["brand"], nome=request.form["album"]):
-            cursore = Categorie.query.filter_by(brand=request.form["brand"], nome=request.form["album"]).first()
-            gioielli = cursore.gioielli
-            for i in gioielli:
-                for x in nomi_file:
-                    if i.codice == request.form[f"codice_id{x}"]:
-                        try:
-                            prezzo = float(request.form[f"prezzo{x}"])
-                        except:
-                            tmp = []
-                            tmp.append(request.form[f"prezzo{x}"].rsplit(',', 1)[0])
-                            tmp.append(request.form[f"prezzo{x}"].rsplit(',', 1)[1])
-                            prezzo = tmp[0] + "." + tmp[1]
-                            prezzo = float(prezzo)
-                        i.prezzo = prezzo
-                        i.immagine = x
-                        db.session.commit()
-        else:
-            categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
-            db.session.add(categoria)
-            db.session.commit()
+    global frase, back_to
 
-    else:
-        brand = Brand(request.form["brand"], nomi_file[0])
-        db.session.add(brand)
+    brand = Brand(request.form["brand"], nomi_file[0])
+
+    db.session.add(brand)
+    db.session.commit()
+
+    try:
+        immagine = nomi_file[1]
+    except:
+        immagine = nomi_file[0]
+
+    categoria = Categorie(request.form["album"], request.form["brand"], immagine)
+
+    db.session.add(categoria)
+    db.session.commit()
+
+    for i in nomi_file:
+
+        # escamotage per trasformare stringa con , in float  con .
+
+        try:
+
+            prezzo = float(request.form[f"prezzo{i}"])
+
+        except:
+
+            tmp = []
+
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
+
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
+
+            prezzo = tmp[0] + "." + tmp[1]
+
+            prezzo = float(prezzo)
+
+        print(prezzo)
+
+        cat = Categorie.query.filter_by(nome=request.form["album"], brand=request.form["brand"]).first()
+
+        gioiello = Gioielli(i, prezzo, request.form[f"codice_id{i}"], request.form["brand"], cat.unicode)
+
+        db.session.add(gioiello)
         db.session.commit()
-        categoria = Categorie(request.form["album"], request.form["brand"], nomi_file[0])
-        db.session.add(categoria)
-        db.session.commit()
-        for i in nomi_file:
-            # escamotage per trasformare stringa con , in float  con .
-            try:
-                prezzo = float(request.form[f"prezzo{i}"])
-            except:
-                tmp = []
-                tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
-                tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
-                prezzo = tmp[0] + "." + tmp[1]
-                prezzo = float(prezzo)
-            print(prezzo)
-            gioiello = Gioielli(i, prezzo,
-                                request.form[f"codice_id{i}"], request.form["brand"], categoria.unicode)
-            db.session.add(gioiello)
-            db.session.commit()
 
-
+    frase = "upload avvenuto con successo"
+    back_to = "espositore"
 
     return redirect(url_for("routing"))
 
 
 @app.route('/uploading', methods=['POST'])
 def upload_file():
+    global frase, back_to
     nomi_file.clear()  #pulisco array per evitare sovrapposizioni in upload successivi
     if request.method == 'POST' :
 
@@ -682,6 +701,30 @@ def upload_file():
         return render_template("upload.html", nomi_file=nomi_file,
                                album=request.form["album"], brand=request.form["brand"])
     return render_template("welcome.html", frase="Errore in upload file")
+
+
+@app.route('/modifica_oggetto', methods=['POST'])
+def modifica_oggetto():
+    gioiello = Gioielli.query.filter_by(codice=request.form["codice"]).first()
+
+    return render_template("modifica_oggetto.html", gioiello=gioiello)
+
+
+@app.route('/effettua_modifica_oggetto', methods=['POST'])
+def effettua_modifica_oggetto():
+    global frase, back_to
+
+    gioiello = Gioielli.query.filter_by(codice=request.form["vecchio_codice"]).first()
+    gioiello.prezzo = request.form["prezzo"]
+    gioiello.codice = request.form["codice"]
+    db.session.commit()
+
+    frase = "modifica avvenuta con successo"
+    back_to = "espositore"
+
+    return redirect(url_for("routing"))
+
+
 
 
 # route per pagina categorie dello specifico brand
@@ -728,7 +771,7 @@ def add_to_cart():
     # dati diviene un array
     dati = request.form["data"].split(",")
     carrello.append(dati[0])
-    quantity.append(dati[1])
+    quantity[dati[0]] = dati[1]
 
     prezzo = float(dati[2]) * (float(dati[1]))
     spesa = float("{0:.2f}".format(spesa + prezzo))
@@ -750,14 +793,62 @@ def remove_from_cart():
     if spesa > 0 :
         for i in range(0, len(carrello)):
             if carrello[i] == codice:
-                prezzo_finale = float(quantity[i]) * prezzo
-                quantity.pop(i)
+                prezzo_finale = float(quantity[carrello[i]]) * prezzo
+                del quantity[carrello[i]]
                 break
     if carrello[i] == codice:
         carrello.remove(codice)
         spesa = round(float(spesa - prezzo_finale),2)
 
     return f"{spesa}"
+
+
+@app.route('/svuota_carrello', methods=['POST'])
+def svuota_carrello():
+    global carrello, spesa, quantity, frase, back_to
+    carrello.clear()
+    spesa = 0
+    quantity.clear()
+    frase = "Carrello svuotato"
+    back_to = "espositore"
+    print("proco dio")
+
+    return redirect(url_for("routing"))
+
+
+def stampa(ordine_numero):
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Welcome to Python!", ln=1, align="C")
+        pdf.output(f"static/{ordine_numero}.pdf")
+    except:
+        print ("pdf creation failed")
+
+
+@app.route('/invia_email_cliente', methods=['POST'])
+def invia_email_cliente():
+    global frase, back_to
+    ordine = Ordini.query.filter_by(codice=request.form["value"]).first()
+    cliente = Clienti.query.filter_by(codice_fiscale=ordine.cliente).first()
+
+    try:
+        msg = Message('Ordine', sender='provaprovaprova52@virgilio.it', recipients=[f"{cliente.email}"])
+        msg.body = f"""Salve le alleghiamo di seguito la ricevuta d'ordine da lei effettuata.
+        Cordiali saluti"""
+        with app.open_resource(f'static/{ordine.codice}.pdf') as fp:
+            msg.attach(f'{ordine.codice}.pdf', "application/pdf", fp.read())
+        mail.send(msg)
+        frase = "email inviata con successo"
+        back_to = "ordini"
+    except:
+        print("email non inviata al cliente")
+        frase = "errore nell'invio dell'email"
+        back_to = "ordini"
+
+    return redirect(url_for('routing'))
+
 
 
 
