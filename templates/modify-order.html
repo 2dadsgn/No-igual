@@ -6,35 +6,58 @@
             <div class="col-md-8 box-gray-ordini-crea">
                 <div class="row">
                     <div class="col-12">
-                        <input class="hidden" name="tipo" value="update" type="text">
 
-                        <input class="col-6 hidden" name="ordine_numero" type="text"
-                               value="{{ ordine["ordine_numero"] }}">
+                        <input class="col-6 hidden" name="codice" type="text"
+                               value="{{ ordine.codice }}">
 
-                        <h4 class="col-6">Ragione sociale </h4>
-                        <input class="col-6" name="nome_cliente" type="text" value="{{ ordine["ragione_sociale"] }}">
+                        <h4 class="col-6 dritto">Cliente </h4>
+                        <select class="dritto" name="cliente">
+                            <option value="{{ ordine.cliente }}">{{ ordine.cliente }}</option>
+                            {% if clienti %}
+                                {% for d in clienti %}
+                                    <option value="{{ d.ragione_sociale }}">{{ d.ragione_sociale }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="empty"></option>
+                            {% endif %}
+                        </select>
 
-                        <h4 class="col-6">Codice Cliente:</h4>
-                        <input type="text" name="codice_cliente" class="col-6" value="{{ ordine["codice_cliente"] }}">
+                        <h4 class="col-6 dritto">Totale importo:</h4>
+                        <input type="text" name="codice_cliente" class="col-6 dritto" value="{{ ordine.totale }}">
 
-                        <h4 class="col-6">Pagamento</h4>
-                        <input type="text" name="pagamento" class="col-6" value="{{ ordine["pagamento"] }}">
+                        <h4 class="col-6 dritto">Pagamento</h4>
+                        <select class="dritto" name="pagamento">
+                            <option value="{{ ordine.pagamento }}">{{ ordine.pagamento }}</option>
+                            <option value="riba">RIBA</option>
+                            <option value="rid">RID</option>
+                            <option value="rimessa diretta">Rimessa diretta</option>
+                            <option value="contrassegno">Contrassegno</option>
+                            <option value="bonifico">Bonifico</option>
+                            <option value="assegno">Assegno</option>
+                        </select>
 
-                        <h4 class="col-6">Data:</h4>
-                        <input type="date" name="data" class="col-6" value="{{ ordine["data"] }}">
+                        <h4 class="col-6 dritto">Data:</h4>
+                        <input type="date" name="data" class="col-6 dritto" value="{{ ordine.data_consegna }}">
                     </div>
 
                     <div class="col-12">
-                        <h4 class="col-6">Codici articoli:</h4>
-                        {% for i in ordine["carrello"] %}
-                            <p class="col-2">{{ i }}</p>
+                        <h4 class="col-12 dritto">Codici articoli:</h4>
+                        {% for i in ordine.carrello %}
+                            <p class="col-2">{{ i.codice_barre }}</p>
+                            <img class="col-2" height="120px" width="120px"
+                                 src="{{ url_for("static",filename=i.immagine) }}">
                         {% endfor %}
                     </div>
                 </div>
             </div>
-            <div class="row div-tasti">
-                <button class="tasto-ins" onclick="http('/routing','target','ordini')">annulla</button>
-                <button class="tasto-ins" onclick="http('/routing','target','!modifica_ordine')">conferma</button>
+        <div class="row ">
+            <div class="col-5 col-md-4 col-lg-4"></div>
+            <button class="col-1 col-md-1 col-lg-1 dritto" onclick="http('/routing','target','ordini')">annulla</button>
+            <div class="col-1 col-md-1 col-lg-1"></div>
+            <button class="col-2 col-md-1 col-lg-1  dritto" onclick="http('/routing','target','!modifica_ordine')">
+                conferma
+            </button>
+            <div class="col-5 col-md-4 col-lg-4"></div>
             </div>
     </div>
     <!--FINE SEZIONE modifica ORDINE-->

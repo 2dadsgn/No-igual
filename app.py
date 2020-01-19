@@ -1,16 +1,19 @@
+import datetime
 import os
-
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
+from fpdf import FPDF
 from random_password import random_password
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
+mail = Mail(app)
+
 # config for the upload folder
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -22,8 +25,8 @@ app.secret_key = b'_52ksaLFwerWWrcdesal'
 
 app.config['MAIL_SERVER'] = 'out.virgilio.it'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'lubrano.biagio@virgilio.it'
-app.config['MAIL_PASSWORD'] = 'prova'
+app.config['MAIL_USERNAME'] = 'provaprovaprova52@virgilio.it'
+app.config['MAIL_PASSWORD'] = 'progettodb52'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -35,130 +38,158 @@ mail = Mail(app)
 class Utenti(db.Model):
     email = db.Column(db.String(20), primary_key=True, nullable=False)
     password = db.Column(db.String(12), nullable=False)
-    poteri = db.Column(db.Integer, nullable=False, default=0)
+    poteri = db.Column(db.Integer, default=0)
+    approvato = db.Column(db.Integer, default=0)
     ordini = db.relationship('Ordini', backref='utente', lazy=True)
 
-
-def __init__(self, email, password, poteri):
-    self.email = email
-    self.password = password
-    self.poteri = poteri
+    def __init__(self, email, password, poteri, approvato):
+        self.email = email
+        self.password = password
+        self.poteri = poteri
+        self.approvato = approvato
 
 
 # gioielli------------
 class Gioielli(db.Model):
-    brand = db.Column(db.String(30), nullable=False)
-    categoria = db.Column(db.String(20), nullable=False)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'))
+    categoria = db.Column(db.Integer, db.ForeignKey('categorie.unicode'))
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
     codice = db.Column(db.String(30), primary_key=True)
 
+    def __init__(self, immagine, prezzo, codice, brand, categoria):
 
-def __init__(self, unicode, brand, categoria, immagine, prezzo, codice, ordine):
-    self.unicode = unicode
-    self.brand = brand
-    self.categoria = categoria
-    self.immagine = immagine
-    self.prezzo = prezzo
-    self.codice = codice
-    self.ordine = ordine
-
-
+        self.immagine = immagine
+        self.prezzo = prezzo
+        self.codice = codice
+        self.brand = brand
+        self.categoria = categoria
 # -------------------------
+
+# ---------BRAND----------
+class Brand(db.Model):
+    nome = db.Column(db.String(20), primary_key=True)
+    img = db.Column(db.String(30), nullable=True, default='140X140.gif')
+    categorie = db.relationship('Categorie', backref='category', lazy=True)
+    oggetto = db.relationship('Gioielli', backref='marca', lazy=True)
+    ordinati = db.relationship('Gioielli_Ordinati', backref='marca', lazy=True)
+
+    def __init__(self, nome, img):
+        self.nome = nome
+        self.img = img
+
+
+# --------------------
+
+
+# ---------categorie----------
+class Categorie(db.Model):
+    unicode = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(20), nullable=False)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
+    gioielli = db.relationship('Gioielli', backref='categ', lazy=True)
+    ordinati = db.relationship('Gioielli_Ordinati', backref='category', lazy=True)
+    img = db.Column(db.String(30), nullable=True, default='140X140.gif')
+
+    def __init__(self, nome, brand, img):
+        self.nome = nome
+        self.brand = brand
+        self.img = img
+
 
 
 # ordini------------
 class Ordini(db.Model):
-    author = db.Column(db.String(30), db.ForeignKey('Utenti.email'), nullable=False)
+    author = db.Column(db.String(30), db.ForeignKey('utenti.email'), nullable=False)
     codice = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.Date, nullable=False)
-    totale = db.Column(db.Float, unique=True, nullable=False)
-    cliente = db.Column(db.String(), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
+    data_esecuzione = db.Column(db.String(20), nullable=False)
+    data_consegna = db.Column(db.String(20), nullable=False)
+    totale = db.Column(db.Float, nullable=False)
+    cliente = db.Column(db.String(30), db.ForeignKey('clienti.codice_fiscale'), nullable=False)
     pagamento = db.Column(db.String(20), nullable=False)
     carrello = db.relationship('Gioielli_Ordinati', backref='ordine', lazy=True)
 
-
-def __init__(self, author, codice, data, totale, cliente, pagamento, carrello):
-    self.author = author
-    self.codice = codice
-    self.data = data
-    self.totale = totale
-    self.cliente = cliente
-    self.pagamento = pagamento
-    self.carrello = carrello
+    def __init__(self, author, data_esecuzione, data_consegna, totale, cliente, pagamento):
+        self.author = author
+        self.data_esecuzione = data_esecuzione
+        self.data_consegna = data_consegna
+        self.totale = totale
+        self.cliente = cliente
+        self.pagamento = pagamento
 
 
 # -------------------------
+
+
 # gioielli ordinati------------
 class Gioielli_Ordinati(db.Model):
     unicode = db.Column(db.Integer, primary_key=True)
-    brand = db.Column(db.String(30), nullable=False)
-    categoria = db.Column(db.String(20), nullable=False)
+    brand = db.Column(db.String(30), db.ForeignKey('brand.nome'), nullable=False)
+    categoria = db.Column(db.Integer, db.ForeignKey('categorie.unicode'), nullable=False)
     immagine = db.Column(db.String(50), nullable=False, default='140X140.gif')
     prezzo = db.Column(db.Float, nullable=False)
-    codice = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
+    quantita = db.Column(db.Integer, default=1)
+    codice_barre = db.Column(db.String(30), db.ForeignKey('gioielli.codice'), nullable=False)
     codice_ordine = db.Column(db.Integer, db.ForeignKey('ordini.codice'), nullable=False)
 
-
-def __init__(self, brand, categoria, immagine, prezzo, codice, codice_ordine):
-    self.brand = brand
-    self.categoria = categoria
-    self.immagine = immagine
-    self.prezzo = prezzo
-    self.codice = codice
-    self.codice_ordine = codice_ordine
-
-
+    def __init__(self, brand, categoria, immagine, prezzo, codice_barre, codice_ordine, quantita):
+        self.brand = brand
+        self.categoria = categoria
+        self.immagine = immagine
+        self.prezzo = prezzo
+        self.codice_barre = codice_barre
+        self.codice_ordine = codice_ordine
+        self.quantita = quantita
 # -------------------------
 
 
 # clienti------------
 class Clienti(db.Model):
     nome = db.Column(db.String(10), nullable=False)
-    cognnome = db.Column(db.String(15), nullable=False)
+    cognome = db.Column(db.String(15), nullable=False)
     via = db.Column(db.String(30), nullable=False)
     cap = db.Column(db.Integer, nullable=False)
     citta = db.Column(db.String(20), nullable=False)
     provincia = db.Column(db.String(4), nullable=False)
     partita_iva = db.Column(db.String(30), nullable=False, unique=True)
     codice_fiscale = db.Column(db.String(40), primary_key=True)
-    email = db.Column(db.String(30), nullable=False)
+    email = db.Column(db.String(30), nullable=True)
+    email_pec = db.Column(db.String(30), nullable=True)
+    codice_sdi = db.Column(db.String(30), nullable=False)
+    telefono = db.Column(db.String(30), nullable=False)
     banca = db.Column(db.String(30), nullable=False)
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
-    ordini = db.relationship('Ordini', backref='cliente', lazy=True)
+    ordini = db.relationship('Ordini', backref='ordinato_da', lazy=True)
 
-
-def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, banca, iban,
-             ragione_sociale, ordini):
-    self.nome = nome
-    self.cognome = cognome
-    self.via = via
-    self.cap = cap
-    self.citta = citta
-    self.provincia = provincia
-    self.partita_iva = partita_iva
-    self.codice_fiscale = codice_fiscale
-    self.email = email
-    self.banca = banca
-    self.iban = iban
-    self.ragione_sociale = ragione_sociale
-    self.ordini = ordini
-
+    def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, pec, codice_sdi,
+                 telefono, banca, iban, ragione_sociale):
+        self.nome = nome
+        self.cognome = cognome
+        self.via = via
+        self.cap = cap
+        self.citta = citta
+        self.provincia = provincia
+        self.partita_iva = partita_iva
+        self.codice_fiscale = codice_fiscale
+        self.email = email
+        self.codice_sdi = codice_sdi
+        self.telefono = telefono
+        self.banca = banca
+        self.iban = iban
+        self.ragione_sociale = ragione_sociale
+        self.email_pec = pec
 
 # -------------------------
 
 
 #########################
 
-
-
 app.host = '0.0.0.0'
 
-# global orders index
-# indice_ordini = 0
 # global clients code
 codice_clienti = 0
+
 # nomifile global
 nomi_file = []
 
@@ -167,16 +198,23 @@ spesa = 0.0
 
 # global brand in visualizzazione
 brand_attuale = "none"
+categoria_attuale = "none"
 
 # carrello
 carrello = []
 
 # quantity
-quantity = []
+quantity = {
+    " ": None
+}
 
 # global per routing
 frase = "null"
 back_to = "null"
+
+# array per briciole di pane in espositore
+prev = []
+
 
 
 @app.route('/')
@@ -186,25 +224,24 @@ def index():
 
 @app.route('/routing', methods=["POST", "GET"])
 def routing():
-    global indice_ordini
+    global indice_ordini, carrello, spesa, frase, back_to  # aggiunta qui ultimamente spesa
     try:
         # lista di brand
-        gioielli = Gioielli.query.all()
-        nomi_brand = []
-        for i in gioielli:
-            nomi_brand.append(i.brand)
-
+        brand = Brand.query.all()
+    except:
+        print("-- error in fetchin brand for routing ---")
+    try:
         # lista di clienti
         customers = Clienti.query.all()
-        arrayclienti = []
-        for x in customers:
-            arrayclienti.append(x.ragione_sociale)
+    except:
+        print("-- error in fetchin clienti for routing ---")
 
+    try:
         # lista ordini se admin tutto se agent --> partial
         if session["type"] == "admin":
             orders = Ordini.query.all()
         else:
-            orders = Ordini.query.filter_by(auhor=session["username"]).all()
+            orders = Ordini.query.filter_by(author=session["username"]).all()
 
         ordini = []
         for i in orders:
@@ -212,35 +249,47 @@ def routing():
 
         ordini.reverse()
 
-    # if ordini:
-    #   indice_ordini = int(ordini[0].codice)
-    # else:
-    #      indice_ordini = 0
+    except:
+        print("-- error in fetchin ordini for routing ---")
+
+    try:
+        # lista utenti
+        if session["type"] == "admin":
+            utenti = Utenti.query.all()
 
     except:
-        print("-- erorre in fetchin data ---")
+        print("-- error in fetchin utenti for routing ---")
+
+
+
+
     try:
         errore = "nessuno"
 
         if request.form["value"] == "clienti":
             errore = "in clienti"
-            return render_template("clienti.html", clienti=arrayclienti)
+            return render_template("clienti.html", clienti=customers)
 
         elif request.form["value"] == "aggiungi_cliente" :
             return render_template("crea_cliente.html")
         elif request.form["value"] == "rimuovi_cliente":
-            return render_template("elimina_cliente.html", clienti=arrayclienti)
+            return render_template("elimina_cliente.html", clienti=customers)
 
         elif request.form["value"] == "ordini" :
             errore = "in ordini"
             return render_template("ordini.html", ordini=ordini)
 
         elif request.form["value"] == "espositore":
-            # effettuare distinzione admin agemnt
-            return render_template("manage_admin.html", nomi_brand=nomi_brand)
+            # effettuare distinzione admin agent
+            return render_template("manage_admin.html", nomi_brand=brand)
 
         elif request.form["value"] == "account":
-            return render_template("account.html")
+            utente = Utenti.query.filter_by(email=session["username"]).first()
+            if utente.poteri == 1:
+                return render_template("account.html", utenti=utenti)
+            else:
+                frase = "Non si dispone delle autorizzazioni necessarie"
+                back_to = "espositore"
 
         elif request.form["value"] == "upload":
             return render_template("upload.html")
@@ -249,71 +298,139 @@ def routing():
             return render_template("modify-order.html")
         #crea ordine
         elif request.form["value"] == "crea_ordine":
+            # c'è un errore in fetchin con codice a barre perchè gioielli ordinati unicode non barre
+            gioielli_carrello = []
+            gioielli_carrello.clear()
+            for i in carrello:
+                temp = Gioielli.query.filter_by(codice=i).first()
+                gioielli_carrello.append(temp)
 
-            return render_template("crea_ordine.html", clienti=arrayclienti, carrello=carrello, totale=spesa)
+            return render_template("crea_ordine.html", clienti=customers, carrello=gioielli_carrello,
+                                   quantita=quantity, totale=spesa)
+
         print("non trova nessun route da soddisfare in function routing")
 
 
     except:
-        global frase
-        print("none value")
 
-        if frase == "null" and session["username"]:
-            frase = "Benvenuto " + session["username"]
-        elif session["username"] == "" or session["username"] == None :
-            render_template("home.html")
+        print("nessun route richiesto")
 
+
+
+    if frase == "Benvenuto" and session["username"]:
+        frase = "Benvenuto " + session["username"]
+    elif session["username"] == "" or session["username"] == None:
+        render_template("home.html")
     return render_template("welcome.html", frase=frase, back_to=back_to)
 
 
-def sending_email(destinatario):
-    token = random_password(length=6,
-                            characters=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'a', 'b', 'c', 'd', 'e',
-                                        'f'
-                                , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
-                                , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
-    msg = Message('Accesso credenziali', sender='No Igual gioielli', recipients=destinatario)
-    msg.body = f"ciao  {destinatario} , conserva queste informazioni accuratamente,ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No Igual gioielli, questa è la tua password --> {token} <--  "
-    print(msg)
-    try:
-        mail.send(msg)
-    except:
-        print("message password not sent")
-        return "errore"
-    return token
 
 @app.route('/logging', methods=["POST"])
-def logging():  # admin/admin   agent/123     agent2/123
+def logging():
+    global frase, back_to
     username = request.form["username"]
     password = request.form["password"]
 
+    # ricerca utente in DB
     cursore = Utenti.query.filter_by(email=username).first()
 
     if cursore == None:
-        errore = "utente non  registrato"
+        biagio = Utenti(username, generate_password_hash(password), 0, 0)
+        db.session.add(biagio)
+        db.session.commit()
+        errore = "utente registrato, in attesa di approvazione"
         return render_template('home.html', error_name=errore)
 
     else:
-        if check_password_hash(cursore.password, password):
+        if cursore.approvato == 0:
+            errore = "utente non ancora approvato"
+            return render_template('home.html', error_pass=errore)
+
+        elif check_password_hash(cursore.password, password):
             if cursore.poteri == 1:
                 tipo_utente = "admin"
                 session["type"] = "admin"
                 session["username"] = request.form["username"]
+                frase = "Benvenuto"
+                back_to = "null"
                 return redirect(url_for("routing"))  # call the method home to load fresh data on access
 
             else:
                 tipo_utente = "rappresentante"
                 session["type"] = "agent"
                 session["username"] = request.form["username"]
+                frase = "Benvenuto"
+                back_to = "null"
                 return redirect(url_for("routing"))  # call the method home to load fresh data on access
         else:
             errore = "password errata"
-            return url_for("index", error_pass=errore)
+            return render_template('home.html', error_pass=errore)
+
+
+@app.route('/approva_utente', methods=["POST"])
+def approvva_utente():
+    global frase, back_to
+    try:
+        utente = Utenti.query.filter_by(email=request.form["value"]).first()
+        if utente.approvato == 0:
+            valore = "abilitato"
+            utente.approvato = 1
+        else:
+            valore = "disabilitato"
+            utente.approvato = 0
+        db.session.commit()
+
+    except:
+        print("errore in approvazione/disapprovazione utente")
+        frase = "Errore in /approva_utente "
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+    frase = f"utente {valore} con successo"
+    back_to = "account"
+    return redirect(url_for("routing"))
+
+
+@app.route('/rimuovi_utente', methods=["POST"])
+def rimuovi_utente():
+    global frase, back_to
+    try:
+        utente = Utenti.query.filter_by(email=request.form["value"]).first()
+        db.session.delete(utente)
+        db.session.commit()
+    except:
+        print("errore eliminazione utente")
+        frase = "Errore in eliminazione_utente "
+        back_to = "account"
+        return redirect(url_for("routing"))
+
+    frase = f"utente rimosso con successo"
+    back_to = "account"
+    return redirect(url_for("routing"))
+
+
+def sending_email(destinatario):
+    try:
+        token = random_password(length=6,
+                                characters=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'a', 'b', 'c', 'd',
+                                            'e',
+                                            'f'
+                                    , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
+                                    , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+
+        msg = Message('Accesso credenziali', sender='provaprovaprova52@virgilio.it', recipients=[f"{destinatario}"])
+        msg.body = f"""ciao  {destinatario} , conserva queste informazioni accuratamente,
+            ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No 
+            Igual gioielli, questa è la tua password --> {token} <--  """
+        mail.send(msg)
+    except:
+        token = "errore"
+    return token
 
 
 @app.route('/create_credentials', methods=["POST"])
-def create_credentials():
+def create_credentials():  #function per creare credenziali da pannello ADMIN
     global frase, back_to
     #crea utente
     if request.form["tipo-azione"] == "nuovo-utente":
@@ -323,7 +440,7 @@ def create_credentials():
                 frase = "errore nell'invio del messaggio password email"
                 back_to = "account"
                 return redirect(url_for("routing"))
-            new_utente = Utenti(request.form["email"], password_generata)
+            new_utente = Utenti(request.form["email"], generate_password_hash(password_generata), 0, 1)
             db.session.add(new_utente)
             db.session.commit()
 
@@ -358,9 +475,9 @@ def create_credentials():
 @app.route('/switch_modifica_crea', methods=["POST"])
 def switch_modifica_crea():
     if request.form["value"] == "new-utente":
-        return ' <h4>Inserisci nuova email</h4> <input class="dritto" type="email" name="email" value="inserisci email">' + '<p>La password sarà generata automaticamente<br> e inviata via email</p>' + '<input class="dritto" type="submit" value="Procedi">'
+        return ' <h4>Inserisci nuova email</h4> <input class="dritto" type="email" name="email" value="">' + '<p>La password sarà generata automaticamente<br> e inviata via email</p>' + '<input class="dritto" type="submit" value="Procedi">'
     else:
-        return '<h4 class="dritto">Inserisci vecchia email</h4><input class="dritto " type="email" name="vecchia-email" value="inserisci email"><h4>Inserisci nuova email</h4><input class="dritto" type="email" name="email" value="inserisci email"><p>La password sarà generata automaticamente<br> e inviata via email</p><input class="dritto" type="submit" value="Procedi">'
+        return '<h4 class="dritto">Inserisci vecchia email</h4><input class="dritto " type="email" name="vecchia-email" value=""><h4>Inserisci nuova email</h4><input class="dritto" type="email" name="email" value=""><p>La password sarà generata automaticamente<br> e inviata via email</p><input class="dritto" type="submit" value="Procedi">'
 
 
 
@@ -369,129 +486,126 @@ def switch_modifica_crea():
 
 @app.route('/adding_orders', methods=["POST"])
 def adding_orders():
-    global carrello
-    global spesa
-    global indice_ordini
-    if request.form["tipo"] == "update":
-        try:
-            result = Ordini.query.filter_by(codice=request.form["ordine_numero"]).first()
-            cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
-            result.pagamento = request.form["pagamento"]
-            result.data = request.form["data"]
-            result.cliente = cliente.codice_fiscale
+    global carrello, spesa, frase, back_to
+    data_esecuzione = datetime.date.today()
 
-            # non effettua update del carrello, ma si potrebbe fare inserendo roba nel carrello e poi aggiornando l'ordine
-            #da qui tramite modifica
 
-            print(result)
-            return redirect(url_for("home"))
-        except:
-            print("update failed")
-    else:
-        # canc se funziona sql autogenerate primarykey
-        # if indice_ordini == 0:
-        #   ordine_numero = 1
-        #   indice_ordini = indice_ordini + 1
-        # else:
-        #   ordine_numero = indice_ordini + 1
-        #  indice_ordini = indice_ordini + 1
+    try:
+        cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
+        ordine = Ordini(session["username"], data_esecuzione, request.form["data"], spesa, cliente.codice_fiscale,
+                        request.form["pagamento"])
 
-        try:
-            cliente = Clienti.query.filter_by(request.form["ragione_sociale"]).first()
-            ordine = Ordini(session["username"], request.form["data"], spesa, cliente.codice_fiscale,
-                            request.form["pagamento"])
-            mongo.db.ordini.insert(
-                {"ordine_numero": f"{indice_ordini}", "codice_cliente": "prova",
-                 "ragione_sociale": request.form["ragione_sociale"],
-                 "pagamento": request.form["pagamento"], "carrello": carrello, "data": request.form["data"],
-                 "agent_code": session["username"]})
-            error = 0
+        db.session.add(ordine)
 
-        except:
-            error = 1
+        db.session.commit()
+        t =0
 
+        for i in carrello:
+            gioiello = Gioielli.query.filter_by(codice=i).first()
+            gioiello_ordinato = Gioielli_Ordinati(gioiello.brand, gioiello.categoria, gioiello.immagine,
+                                                  gioiello.prezzo, gioiello.codice, ordine.codice, quantity[i])
+
+            db.session.add(gioiello_ordinato)
+            db.session.commit()
+            t = t +1
         carrello.clear()
-        spesa=0
-        print(error)
-        # ottengo cursore da mongo se admin tutti ordini
-        # se agent solo ordini effettuati
-        if session["type"] == "admin":
-            cursore = mongo.db.ordini.find()
-        else:
-            cursore = mongo.db.ordini.find({"agent_code": session["username"]})
-
-        ordini = []
-        for i in cursore:
-            ordini.append(i)
-
-        ordini.reverse()
-
-        if ordini:
-            indice_ordini = int(ordini[0]["ordine_numero"])
-        else:
-            indice_ordini = 0
-    global frase, back_to
-    frase = "ordine effettuato con successo"
-    back_to = "ordini"
-    if session["type"] == "admin":
-
-        return redirect(url_for("routing"))
+        quantity.clear()
+        spesa = 0
+        error = 0
+    except:
+        error = 1
+    ordine = Ordini.query.all()
+    for i in ordine:
+        i
+    stampa(i.codice)
+    if error == 1:
+        frase = "errore imprevisto nell'aggiunta ordine"
     else:
-        return redirect(url_for("routing"))
+        frase = "ordine avvenuto con successo"
+
+    back_to = "ordini"
+
+    return redirect(url_for("routing"))
 
 
 @app.route('/modifica_ordine', methods=["POST"])
 def modifica_ordine():
-    print("modifica")
-    cursore = mongo.db.ordini.find_one({"ordine_numero": request.form["value"]})
-    return render_template("modify-order.html", ordine=cursore)
+    print("modifica ordine in modifica_ordine")
+    # retrieve of the order with the form value, value is the unicode of the order
+    ordine = Ordini.query.filter_by(codice=request.form["value"]).first()
+    clienti = Clienti.query.all()
+
+    return render_template("modify-order.html", ordine=ordine, clienti=clienti)
+
+
+@app.route('/modifica!', methods=["POST"])
+def modifica_ordine_effetttuata():
+    # retrieve of the order with the form value, value is the unicode of the order
+    ordine = Ordini.query.filter_by(codice=request.form["codice"]).first()
+    ordine.data = request.form["data"]
+    ordine.pagamento = request.form["pagamento"]
+    ordine.cliente = request.form["cliente"]
+    db.session.commit()
+
+    return render_template("modify-order.html", ordine=ordine)
 
 
 @app.route('/elimina_ordine', methods=['POST'])
 def elimina_ordine():
-    global indice_ordini
 
     try:
 
-        mongo.db.ordini.delete_one({"ordine_numero": request.form["value"]})
-        indice_ordini = indice_ordini - 1
-        cursore = mongo.db.ordini.find()
-    except:
-        print("errore in deleting ")
+        Ordini.query.filter_by(codice=request.form["value"]).delete()
 
-    return render_template("ordini.html", ordini=cursore)
+        while Gioielli_Ordinati.query.filter_by(codice_ordine=request.form["value"]).all():
+            Gioielli_Ordinati.query.filter_by(codice_ordine=request.form["value"]).delete()
+        db.session.commit()
+
+
+
+    except:
+        print("errore in deleting in elimina_ordine ")
+
+    try:
+        if session["type"] == "admin":
+            cursore = Ordini.query.filter_by(author=session["username"]).all()
+        else:
+            cursore = Ordini.query.filter_by(author=session["username"]).all()
+    except:
+        print ("errore in fetchin ordini dopo eliminazione ordine")
+
+    tmp = []
+    tmp.clear()
+    for i in cursore:
+        tmp.append(i)
+    tmp.reverse()
+
+    return render_template("ordini.html", ordini=tmp)
+
+
 
 
 # aggiunta cliente nel db
 @app.route('/adding_customer', methods=['POST'])
 def adding_customer():
-    global codice_clienti
-    mongo.db.clienti.insert({
-        "nome": request.form["nome"],
-        "cognome": request.form["cognome"],
-        "ragione_sociale": request.form["ragione_sociale"],
-        "via": request.form["via"],
-        "cap": request.form["cap"],
-        "città": request.form["città"],
-        "provincia": request.form["provincia"],
-        "partita_iva": request.form["partita_iva"],
-        "codice_fiscale": request.form["codice_fiscale"],
-        "codice_sdi": request.form["codice_sdi"],
-        "email": request.form["email"],
-        "telefono": request.form["telefono"],
-        "banca": request.form["banca"],
-        "iban": request.form["iban"]
-    })
+    customer = Clienti(request.form["nome"], request.form["cognome"], request.form["via"], request.form["cap"]
+                       , request.form["città"], request.form["provincia"], request.form["partita_iva"],
+                       request.form["codice_fiscale"], request.form["email"], request.form["email_pec"],
+                       request.form["codice_sdi"],
+                       request.form["telefono"], request.form["banca"], request.form["iban"],
+                       request.form["ragione_sociale"])
+    db.session.add(customer)
+    db.session.commit()
+
     return render_template("welcome.html", frase="Cliente aggiunto", back_to="clienti")
 
 
 # rimozione cliente nel db
 @app.route('/removing_customer', methods=['POST'])
 def removing_customer():
-    global codice_clienti
-    mongo.db.clienti.delete_one({
-        "ragione_sociale": request.form["cliente-da-eliminare"]
-    })
+    Clienti.query.filter_by(ragione_sociale=request.form["cliente-da-eliminare"]).delete()
+    db.session.commit()
+
     return render_template("welcome.html", frase="Cliente rimosso", back_to="clienti")
 
 
@@ -504,64 +618,61 @@ def allowed_file(filename):
 
 @app.route('/upload_info', methods=['POST'])
 def upload_info_file():
+    global frase, back_to
+
+    brand = Brand(request.form["brand"], nomi_file[0])
+
+    db.session.add(brand)
+    db.session.commit()
+
     try:
-        brand_cursore = mongo.db.brand.find({"brand": request.form["brand"]})
+        immagine = nomi_file[1]
     except:
-        print("brand  non trovato")
+        immagine = nomi_file[0]
 
-    espositore = []
-    categorie = []
-    iteratore = []
-    # preparo dati in un vettore da inserire in DB
+    categoria = Categorie(request.form["album"], request.form["brand"], immagine)
+
+    db.session.add(categoria)
+    db.session.commit()
+
     for i in nomi_file:
-        espo = {"immagine": i,
-                "codice": request.form[f"codice_id{i}"],
-                "prezzo": request.form[f"prezzo{i}"]}
-        espositore.append(espo.copy())
-        espo.clear()
 
-    t = 0
+        # escamotage per trasformare stringa con , in float  con .
 
-    for i in brand_cursore:
-        t = t + 1
-    # la collezione brand ha un campo stringa brand
-    # un campo categorie che è un vettore con tutti i nomi degli album
-    #e un campo espositore che ha il campo con nome categoria ed è un vettore con tutte le info sui file
-
-    if t == 0:
-        print("insert")
-        categorie.append(f"{request.form['album']}")
-
-        mongo.db.brand.insert({
-            "brand": request.form["brand"],
-            "categorie": categorie,
-            f"{request.form['album']}": espositore
-        })
-    else:
-
-        # ci sono due casi di update
-        # primo in cui il brand esiste già ma si sta creando una nuova categoria
-        #secondo in cui la categoria anche esiste già e si vuole aggiungere/ sostituire elementi
-
-        print("update")
-
-        # caso in cui esiste brand e anche categoria
         try:
-            print(brand_cursore)
+
+            prezzo = float(request.form[f"prezzo{i}"])
 
         except:
-            print("errore in fetching the album, so it doesnt exist already")
 
+            tmp = []
 
-        mongo.db.brand.update_one({"brand": request.form["brand"]},
-                                  {"$set": {"categorie": categorie,
-                                            f"{request.form['album']}": espositore}})
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[0])
+
+            tmp.append(request.form[f"prezzo{i}"].rsplit(',', 1)[1])
+
+            prezzo = tmp[0] + "." + tmp[1]
+
+            prezzo = float(prezzo)
+
+        print(prezzo)
+
+        cat = Categorie.query.filter_by(nome=request.form["album"], brand=request.form["brand"]).first()
+
+        gioiello = Gioielli(i, prezzo, request.form[f"codice_id{i}"], request.form["brand"], cat.unicode)
+
+        db.session.add(gioiello)
+        db.session.commit()
+
+    frase = "upload avvenuto con successo"
+    back_to = "espositore"
 
     return redirect(url_for("routing"))
 
 
 @app.route('/uploading', methods=['POST'])
 def upload_file():
+    global frase, back_to
     nomi_file.clear()  #pulisco array per evitare sovrapposizioni in upload successivi
     if request.method == 'POST' :
 
@@ -593,19 +704,91 @@ def upload_file():
     return render_template("welcome.html", frase="Errore in upload file")
 
 
+@app.route('/ricerca_oggetto', methods=['POST'])
+def ricerca_oggetto():
+    global trovato, back_to, frase
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["codice"]).first()
+
+    except:
+        frase = "Ricerca fallita, oggetto non trovavato"
+        back_to = "account"
+        return redirect(url_for('routing'))
+
+    return render_template("modifica_oggetto.html", gioiello=gioiello)
+
+
+@app.route('/elimina_oggetto', methods=['POST'])
+def elimina_oggetto():
+    global frase, back_to
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["value"]).delete()
+        frase = "eliminazione avvenuta con successo"
+        back_to = "espositore"
+        db.session.commit()
+
+    except:
+        frase = "eliminazione non avvenuta"
+        back_to = "espositore"
+
+    return redirect(url_for("routing"))
+
+
+@app.route('/effettua_modifica_oggetto', methods=['POST'])
+def effettua_modifica_oggetto():
+    global frase, back_to
+
+    try:
+        gioiello = Gioielli.query.filter_by(codice=request.form["vecchio_codice"]).first()
+        gioiello.prezzo = request.form["prezzo"]
+        gioiello.codice = request.form["codice"]
+        db.session.commit()
+        frase = "modifica avvenuta con successo"
+        back_to = "espositore"
+    except:
+        frase = "errore"
+        back_to = "espositore"
+
+
+    return redirect(url_for("routing"))
+
+
+
+
+# route per pagina categorie dello specifico brand
 @app.route("/espositore", methods=["POST", "GET"])
 def mostra_espositore():
-    global brand_attuale
-
+    global brand_attuale, prev
     brand_attuale = request.form["value"]
-    brand = mongo.db.brand.find({"brand": request.form["value"]})
-    return render_template("album.html", album=brand)
+    brand = Brand.query.filter_by(nome=request.form["value"]).first()
+    prev.clear()
+    prev.append("espositore")
+
+    return render_template("album.html", brand=brand, prev=prev)
+
+
+#route per pagina gioielli della specifica categoria
+@app.route("/categoria", methods=["POST", "GET"])
+def mostra_categoria():
+    global brand_attuale, categoria_attuale, prev
+
+    categoria = Categorie.query.filter_by(unicode=request.form["value"]).first()
+    categoria_attuale = request.form["value"]
+    gioielli = categoria.gioielli
+    print(brand_attuale, categoria_attuale)
+    for i in gioielli:
+        print(i)
+    prev.clear()
+    prev.append("espositore")
+    prev.append(brand_attuale)
+
+    return render_template("gioielli.html", album=categoria, gioielli=gioielli, prev=prev)
 
 
 @app.route("/view_img", methods=["POST", "GET"])
 def view_img():
-    global brand_attuale
-    return render_template("view_img.html", url_foto=request.form["value"], brand_attuale=brand_attuale)
+    global brand_attuale, categoria_attuale
+    return render_template("view_img.html", url_foto=request.form["value"], categoria=categoria_attuale)
 
 @app.route("/add_to_cart", methods=["POST", "GET"])
 def add_to_cart():
@@ -616,7 +799,7 @@ def add_to_cart():
     # dati diviene un array
     dati = request.form["data"].split(",")
     carrello.append(dati[0])
-    quantity.append(dati[1])
+    quantity[dati[0]] = dati[1]
 
     prezzo = float(dati[2]) * (float(dati[1]))
     spesa = float("{0:.2f}".format(spesa + prezzo))
@@ -638,14 +821,189 @@ def remove_from_cart():
     if spesa > 0 :
         for i in range(0, len(carrello)):
             if carrello[i] == codice:
-                prezzo_finale = float(quantity[i]) * prezzo
-                quantity.pop(i)
+                prezzo_finale = float(quantity[carrello[i]]) * prezzo
+                del quantity[carrello[i]]
                 break
     if carrello[i] == codice:
         carrello.remove(codice)
         spesa = round(float(spesa - prezzo_finale),2)
 
     return f"{spesa}"
+
+
+@app.route('/svuota_carrello', methods=['POST'])
+def svuota_carrello():
+    global carrello, spesa, quantity, frase, back_to
+    carrello.clear()
+    spesa = 0
+    quantity.clear()
+    frase = "Carrello svuotato"
+    back_to = "espositore"
+    print("proco dio")
+
+    return redirect(url_for("routing"))
+
+
+def stampa(ordine_numero):
+    try:
+        ordine = Ordini.query.filter_by(codice=ordine_numero).first()
+        gioielli_ordinati = Gioielli_Ordinati.query.filter_by(codice_ordine=ordine_numero).all()
+        cliente = Clienti.query.filter_by(codice_fiscale=ordine.cliente).first()
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("times", size=25)
+        pdf.cell(40, 10, txt=f"No igual gioielli", ln=0, align="L")
+        pdf.set_font("times", size=12)
+        pdf.cell(100, 10, txt=f"ordine richiesto da {cliente.ragione_sociale}", ln=1, align="R")
+        pdf.cell(140, 10, txt=f"ORDINE numero #{ordine_numero}", ln=1, align="R")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+        pdf.cell(200, 3, txt=f"Articoli ordinati: ", ln=1, align="C")
+        pdf.cell(200, 2, txt="________________________________________________________________________________", ln=1,
+                 align="C")
+        pdf.cell(65, 5, txt=f" ", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"codice", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"quantita", ln=0, align="C")
+        pdf.cell(20, 5, txt=f"prezzo", ln=1, align="C")
+        pdf.cell(200, 5, txt="_________________________________________________________________", ln=1, align="C")
+        for i in gioielli_ordinati:
+            pdf.cell(65, 5, txt=f" ", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.codice_barre}", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.quantita}", ln=0, align="C")
+            pdf.cell(20, 5, txt=f"{i.prezzo}", ln=1, align="C")
+            pdf.cell(200, 5, txt="_________________________________________________________________", ln=1, align="C")
+        pdf.cell(10, 10, txt="", ln=0, align="L")
+        pdf.cell(100, 10, txt=f"Data creazione ordine {ordine.data_esecuzione}", ln=0, align="L")
+        pdf.cell(80, 10, txt=f"Data consegna prevista {ordine.data_consegna}", ln=1, align="R")
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+        pdf.cell(180, 10, txt=f"TOTALE - {ordine.totale} Euro", ln=1, align="R")
+        pdf.cell(200, 2, txt="___________________________________________________________________________________",
+                 ln=1, align="C")
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        pdf.add_page()
+        pdf.cell(200, 2, txt="Dati del cliente", ln=1, align="C")
+
+        pdf.cell(200, 20, txt=" ", ln=1, align="C")
+        # prima riga
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Nome", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.nome}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Cognome", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.cognome}", ln=1, align="LL")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # seconda riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Codice Fiscale", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.codice_fiscale}", ln=0, align="LL")
+
+        pdf.cell(40, 2, txt="Ragione sociale", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.ragione_sociale}", ln=1, align="LL")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # terza riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Via", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.via}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="CAP", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.cap}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quarta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Città", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.citta}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Provincia", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.provincia}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quinta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Partita IVA", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.partita_iva}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Codice SDI", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.codice_sdi}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # quinta riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(20, 2, txt="Email", ln=0, align="L")
+        pdf.cell(60, 2, txt=f"{cliente.email}", ln=0, align="L")
+
+        pdf.cell(20, 2, txt="Pec", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.email_pec}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # SESTA riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="Telefono", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.telefono}", ln=0, align="L")
+
+        pdf.cell(40, 2, txt="Banca", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.banca}", ln=1, align="L")
+
+        pdf.cell(200, 10, txt=" ", ln=1, align="C")
+
+        # settima riga
+
+        pdf.cell(20, 20, txt=" ", ln=0, align="C")
+
+        pdf.cell(40, 2, txt="IBAN", ln=0, align="L")
+        pdf.cell(40, 2, txt=f"{cliente.iban}", ln=1, align="L")
+
+
+
+        pdf.output(f"static/{ordine_numero}.pdf")
+    except:
+        print ("pdf creation failed")
+
+
+@app.route('/invia_email_cliente', methods=['POST'])
+def invia_email_cliente():
+    global frase, back_to
+    ordine = Ordini.query.filter_by(codice=request.form["value"]).first()
+    cliente = Clienti.query.filter_by(codice_fiscale=ordine.cliente).first()
+
+    try:
+        msg = Message('Ordine', sender='provaprovaprova52@virgilio.it', recipients=[f"{cliente.email}"])
+        msg.body = f"""Salve le alleghiamo di seguito la ricevuta d'ordine da lei effettuata.
+        Cordiali saluti"""
+        with app.open_resource(f'static/{ordine.codice}.pdf') as fp:
+            msg.attach(f'{ordine.codice}.pdf', "application/pdf", fp.read())
+        mail.send(msg)
+        frase = "email inviata con successo"
+        back_to = "ordini"
+    except:
+        print("email non inviata al cliente")
+        frase = "errore nell'invio dell'email"
+        back_to = "ordini"
+
+    return redirect(url_for('routing'))
+
 
 
 

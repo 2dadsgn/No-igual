@@ -59,10 +59,17 @@
                 </div>
             </div>
 
-            <div class="row">
-                <h4 class=" dritto col-12">Codici articoli:</h4>
+            <div class="col-12">
+                <h4 class="col-12 dritto">Codici articoli:</h4>
+
                 {% for i in carrello %}
-                    <p class="col-2">{{ i }}</p>
+                    <div class="col-2 col-md-2 col-lg-2" style="display: inline-block">
+                        <p><b>{{ i.codice }}</b> (x{{ quantita[i.codice] }})</p>
+                        <img height="100px" width="100px"
+                             src="{{ url_for("static",filename=i.immagine) }}">
+                    </div>
+
+
                 {% endfor %}
             </div>
             <div class="row">
@@ -78,10 +85,14 @@
         </div>
         <div class="row div-tasti">
             <div class="col-4"></div>
-            <button class="col-2 tasto-canc" id="indietro-ordine" onclick="http('/routing','target','ordini')">
+            <button class="col-6 col-md-2 col-lg-1 tasto-canc" id="indietro-ordine"
+                    onclick="http('/routing','target','ordini')">
                 indietro
             </button>
-            <button class="col-2 tasto-ins" type="submit">crea</button>
+            <button class="col-6 col-md-2 col-lg-1 tasto-ins" type="submit"
+                    onclick="http('/svuota_carrello','target','ordini')">svuota
+            </button>
+            <button class="col-6 col-md-2 col-lg-1 tasto-ins" type="submit">crea</button>
             <div class="col-4"></div>
         </div>
     </form>

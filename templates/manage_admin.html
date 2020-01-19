@@ -1,30 +1,32 @@
 <div id="target">
 
-        <!--SEZIONE ESPOSITORE-->
-        <div class="row" id="sezione-espositore">
+    <!--SEZIONE ESPOSITORE-->
+    <div class="row" id="sezione-espositore">
 
 
-            <div class="row">
-                {% for i in nomi_brand %}
-                    <div class="col-10 col-md-4 col-lg-3">
+        <div class="row">
+            {% for i in nomi_brand %}
 
-                        <form action="{{ url_for("mostra_espositore") }}" method="post">
-                            <h2 class="dritto">{{ i["brand"] }}</h2>
+                <div class="col-10 col-md-5 col-lg-4">
 
-                            <img id="imgclick" onclick="http('/espositore','target','{{ i["brand"] }}')"
-                                 class="dritto img-ogg"
-                                 src="{{ url_for('static',filename='140X140.gif') }}" width="90%"
-                                 height="90%"
-                                 alt=""/>
-                        </form>
-                    </div>
-                {% endfor %}
+                    <h2 style="width: 200px" class="dritto">{{ i.nome }}</h2>
 
-            </div>
+                    <img id="imgclick" onclick="http('/espositore','target','{{ i.nome }}')"
+                         class="dritto img-ogg"
+                         src="{{ url_for('static',filename=i.img) }}" width="200px"
+                         height="200px"
+                         alt=""/>
 
+                </div>
+
+
+            {% endfor %}
 
         </div>
-        <!--FINE SEZXIONE ESPOSITORE-->
+
+
+    </div>
+    <!--FINE SEZXIONE ESPOSITORE-->
 </div>
 
 

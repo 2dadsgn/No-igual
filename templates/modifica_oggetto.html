@@ -16,7 +16,7 @@
 
 </head>
 <body>
-<div class="container-fluid">
+<div class="container-fluid" id="scrolldown">
     <nav id="nav">
         <ol>
             <div class="menuli" id="cart" onclick="http('/routing','target','crea_ordine')">€</div>
@@ -39,45 +39,43 @@
         <div id="exit"></div>
     </nav>
     <div id="target">
-        <form method="POST" action="{{ url_for('upload_info_file') }}">
+
+        <!--SEZIONE modifica-->
+        <div class="dritto">
             <div class="row">
-                <div class="col-2 col-md-2 col-lg-2"></div>
-                <div class="col-8 col-md-8 col-lg-8 ">
-                    <h5 class="dritto" style="text-transform: uppercase;">{{ brand }} / {{ album }}</h5>
-                    <input class="hidden" type="text" value="{{ brand }}" name="brand">
-                    <input class="hidden" type="text" value="{{ album }}" name="album">
+                <div class="col-3 col-md-4 col-lg-4"></div>
+                <div class="col-3 col-md-4 col-lg-4">
+                    <h3>Modifica gioiello</h3>
                 </div>
-                <div class="col-2 col-md-2 col-lg-2"></div>
+                <div class="col-3 col-md-4 col-lg-4"></div>
             </div>
-
-            <div class="row">
-                {% for i in nomi_file %}
-                    <div class="col-4 col-md-3 col-lg-2" style="margin-bottom: 20px">
-                        <img height="200px" width="100%" src="{{ url_for("static",filename=i) }}">
-                        <input class="hidden" type="text" name="nome_file" value="{{ i }}">
-
-                        <h4 class="dritto">Codice id</h4>
-                        <input style="text-align: center;width: 100%;" class="dritto" type="text"
-                               name="codice_id{{ i }}">
-
-                        <h4 class="dritto">Prezzo</h4>
-                        <input style="text-align: center" class="dritto" type="text" value=""
-                               name="prezzo{{ i }}">
+            <form method="post" action="{{ url_for('effettua_modifica_oggetto') }}" id="modifica_oggetto">
+                <div class="row">
+                    <div class="col-1 col-md-3 col-lg-4"></div>
+                    <div class="col-11 col-md-6 col-lg-4">
+                        <img class="dritto" height="200px" width="200px"
+                             src="{{ url_for("static",filename=gioiello.immagine) }}">
                     </div>
-
-                {% endfor %}
-                <div class="col-1"></div>
-
-
-            </div>
-            <div class="row">
-                <div class="col-5"></div>
-                <div class="col-2">
-                    <input style="color: green;" type="submit" value="Procedi!">
+                    <div class="col-1 col-md-3 col-lg-4"></div>
                 </div>
-                <div class="col-5"></div>
-            </div>
-        </form>
+                <div class="row">
+                    <div class="col-4 col-md-3 col-lg-4"></div>
+                    <div class="col-4 col-md-6 col-lg-4">
+                        <input class="hidden" value="{{ gioiello.codice }}" name="vecchio_codice">
+                        <h4>codice</h4>
+                        <input value="{{ gioiello.codice }}" name="codice">
+                        <h4>prezzo</h4>
+                        <input value="{{ gioiello.prezzo }}" name="prezzo">
+                        <button type="submit">Modifica</button>
+                        <button onclick="http('/elimina_oggetto','target','{{ gioiello.codice }}')">Elimina</button>
+                    </div>
+                    <div class="col-4 col-md-3 col-lg-4"></div>
+                </div>
+
+
+            </form>
+        </div>
+        <!--FINE SEZIONE aggiunta CLIENTI-->
 
     </div>
 </div>
