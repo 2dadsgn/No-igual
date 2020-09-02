@@ -17,23 +17,40 @@
 
                 <div class="row" style="width: 100%">
                     {% for i in brand.categorie %}
-                        <div class="col-1 col-md-1 col-lg-1"></div>
-                        <div class="col-3 col-md-4 col-lg-4">
-                            <h2 class="dritto" style="text-transform: uppercase">{{ i.nome }}</h2>
-                            <img class="dritto" height="200px" width="200px"
-                                 src="{{ url_for("static",filename=i.img) }}"
-                                 onclick="http('/categoria','target','{{ i.unicode }}')">
+                        <div class="col-lg-auto col-md-auto">
+                            <div class="row">
+                                <div class="col-1 col-md-1 col-lg-1 offset-4"></div>
+                                <div class="col-3 col-md-4 col-lg-4 ">
+                                    <h2 class="dritto"
+                                        style="text-transform: uppercase;text-align: center">{{ i.nome }}</h2>
+                                    <img class="dritto" height="200px" width="200px"
+                                         src="{{ url_for("static",filename=i.img) }}"
+                                         onclick="http('/categoria','target','{{ i.unicode }}')">
+                                </div>
+                                <div class="col-1 col-md-1 col-lg-1"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-sm-5"></div>
+                                <div class="col-lg-2 col-md-2 col-sm-2">
+
+                                </div>
+                                <div class="col-lg-5 col-md-5 col-sm-5"></div>
+
+                            </div>
+
+
                         </div>
-                        <div class="col-1 col-md-1 col-lg-1"></div>
+
                     {% endfor %}
                 </div>
 
 
             </div>
+
         </div>
+
     </div>
 
-</div>
 
 
 

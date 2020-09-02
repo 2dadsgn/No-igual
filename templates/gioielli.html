@@ -48,7 +48,7 @@
 
                     <div class="col-12">
                         <div class="row">
-                            <input id="{{ c.codice }}radio" class="dritto" type="radio">
+                            <input id="{{ c.codice }}radio" class="dritto disabled" type="radio">
                             <!-- input quantita -->
 
                             <!-- in input tramite _AJAX_-->
@@ -84,6 +84,18 @@
                 </div>
             {% endfor %}
 
+
         </div>
     </div>
+
+    <div class="row hidden">
+        <div class="col-sm-3 col-md-4 col-lg-5"></div>
+        <button style="color: red" class="col-sm-6 col-md-4 col-lg-2 "
+                onclick="http('/elimina_oggetto','target','multiple')">Elimina selezione
+        </button>
+        <div class=" col-sm-3 col-md-4 col-lg-5"></div>
+    </div>
+
 </div>
+
+

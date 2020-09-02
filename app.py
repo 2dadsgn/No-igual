@@ -8,7 +8,9 @@ from random_password import random_password
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
+# modificare prima di caricare /home/pi/Desktop/untitled/static
 UPLOAD_FOLDER = '/Users/labieno/PycharmProjects/untitled/static'
+#UPLOAD_FOLDER = '/home/pi/Desktop/untitled/static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
@@ -25,8 +27,9 @@ app.secret_key = b'_52ksaLFwerWWrcdesal'
 
 app.config['MAIL_SERVER'] = 'out.virgilio.it'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'provaprovaprova52@virgilio.it'
-app.config['MAIL_PASSWORD'] = 'progettodb52'
+sender_email = 'infonoigualgioielli@virgilio.it'
+app.config['MAIL_USERNAME'] = 'infonoigualgioielli@virgilio.it'
+app.config['MAIL_PASSWORD'] = 'hvwbA3uH7K24DVd'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -231,8 +234,14 @@ def routing():
     except:
         print("-- error in fetchin brand for routing ---")
     try:
-        # lista di clienti
-        customers = Clienti.query.all()
+
+        # lista ordini se admin tutto se agent --> partial
+        if session["type"] == "admin":
+            # lista di clienti
+            customers = Clienti.query.all()
+        else:
+    # lista di clienti
+    #customers = Clienti.query.filter_by()
     except:
         print("-- error in fetchin clienti for routing ---")
 
@@ -240,8 +249,10 @@ def routing():
         # lista ordini se admin tutto se agent --> partial
         if session["type"] == "admin":
             orders = Ordini.query.all()
+
         else:
             orders = Ordini.query.filter_by(author=session["username"]).all()
+
 
         ordini = []
         for i in orders:
@@ -396,16 +407,26 @@ def approvva_utente():
 def rimuovi_utente():
     global frase, back_to
     try:
+
         utente = Utenti.query.filter_by(email=request.form["value"]).first()
-        db.session.delete(utente)
-        db.session.commit()
+
+        # se l'utente da cancellare è diverso da quello della sessione corrente
+        # effettua eliminazione altrimenti ritorna errrore
+        if (utente.email == session["username"]):
+            # do nothing
+            frase = f"impossibile eliminare utente sessione attuale"
+        else:
+            db.session.delete(utente)
+            db.session.commit()
+            frase = f"utente rimosso con successo"
+
     except:
         print("errore eliminazione utente")
         frase = "Errore in eliminazione_utente "
         back_to = "account"
         return redirect(url_for("routing"))
 
-    frase = f"utente rimosso con successo"
+
     back_to = "account"
     return redirect(url_for("routing"))
 
@@ -419,12 +440,13 @@ def sending_email(destinatario):
                                     , 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'
                                     , 'u', 'v', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
-        msg = Message('Accesso credenziali', sender='provaprovaprova52@virgilio.it', recipients=[f"{destinatario}"])
+        msg = Message('Accesso credenziali', sender=sender_email, recipients=[f"{destinatario}"])
         msg.body = f"""ciao  {destinatario} , conserva queste informazioni accuratamente,
             ti abbiamo appena inviato le credenziali di accesso per l'espositore online di No 
             Igual gioielli, questa è la tua password --> {token} <--  """
         mail.send(msg)
     except:
+        print("errore in invio email")
         token = "errore"
     return token
 
@@ -489,10 +511,9 @@ def adding_orders():
     global carrello, spesa, frase, back_to
     data_esecuzione = datetime.date.today()
 
-
     try:
         cliente = Clienti.query.filter_by(ragione_sociale=request.form["ragione_sociale"]).first()
-        ordine = Ordini(session["username"], data_esecuzione, request.form["data"], spesa, cliente.codice_fiscale,
+        ordine = Ordini(session["username"], data_esecuzione, request.form["data"], spesa, cliente.ragione_sociale,
                         request.form["pagamento"])
 
         db.session.add(ordine)
@@ -512,12 +533,14 @@ def adding_orders():
         quantity.clear()
         spesa = 0
         error = 0
+        ordine = Ordini.query.all()
+        for i in ordine:
+            i
+        stampa(i.codice)
     except:
         error = 1
-    ordine = Ordini.query.all()
-    for i in ordine:
-        i
-    stampa(i.codice)
+
+
     if error == 1:
         frase = "errore imprevisto nell'aggiunta ordine"
     else:
@@ -620,20 +643,29 @@ def allowed_file(filename):
 def upload_info_file():
     global frase, back_to
 
-    brand = Brand(request.form["brand"], nomi_file[0])
-
-    db.session.add(brand)
-    db.session.commit()
+    # prova a creare il brand se fallisce esiste già
+    if Brand.query.filter_by(nome=request.form["brand"]).first():
+        # do nothing
+        print("brand già esistente")
+    else:
+        brand = Brand(request.form["brand"], nomi_file[0])
+        db.session.add(brand)
+        db.session.commit()
 
     try:
         immagine = nomi_file[1]
     except:
         immagine = nomi_file[0]
 
-    categoria = Categorie(request.form["album"], request.form["brand"], immagine)
+    if Categorie.query.filter_by(nome=request.form["album"], brand=request.form["brand"]).first():
+        # do nothing
+        print("categoria già esistente")
+    else:
+        categoria = Categorie(request.form["album"], request.form["brand"], immagine)
+        db.session.add(categoria)
+        db.session.commit()
 
-    db.session.add(categoria)
-    db.session.commit()
+
 
     for i in nomi_file:
 
@@ -655,11 +687,10 @@ def upload_info_file():
 
             prezzo = float(prezzo)
 
-        print(prezzo)
 
         cat = Categorie.query.filter_by(nome=request.form["album"], brand=request.form["brand"]).first()
 
-        gioiello = Gioielli(i, prezzo, request.form[f"codice_id{i}"], request.form["brand"], cat.unicode)
+        gioiello = Gioielli(i, str(prezzo), request.form[f"codice_id{i}"], request.form["brand"], cat.unicode)
 
         db.session.add(gioiello)
         db.session.commit()
@@ -678,9 +709,12 @@ def upload_file():
 
         file = request.files.getlist("file")
 
-        for i in file:
-            nomi_file.append(i.filename)
+        t=0
 
+        for i in file:
+            nomefile = i.filename.replace("(", "")
+            nomefile = nomefile.replace(")", "")
+            nomi_file.append(nomefile.replace(" ","_"))
 
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -694,11 +728,17 @@ def upload_file():
                 flash('No selected file')
                 return redirect(request.url)
 
+        print("lista nomi file")
+
         # qui loop for per save multiple files
         for t in file:
             if t and allowed_file(t.filename):
-                filename = secure_filename(t.filename)
+                filename = secure_filename(t.filename.replace(" ", "_"))
+                print(filename)
                 t.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        print("fine lista nomi file")
+
         return render_template("upload.html", nomi_file=nomi_file,
                                album=request.form["album"], brand=request.form["brand"])
     return render_template("welcome.html", frase="Errore in upload file")
@@ -709,9 +749,10 @@ def ricerca_oggetto():
     global trovato, back_to, frase
     try:
         gioiello = Gioielli.query.filter_by(codice=request.form["codice"]).first()
+        print(gioiello.codice)
 
     except:
-        frase = "Ricerca fallita, oggetto non trovavato"
+        frase = "Ricerca fallita, oggetto non trovato"
         back_to = "account"
         return redirect(url_for('routing'))
 
@@ -722,7 +763,15 @@ def ricerca_oggetto():
 def elimina_oggetto():
     global frase, back_to
     try:
-        gioiello = Gioielli.query.filter_by(codice=request.form["value"]).delete()
+        # controllo if con due cancellazioni se anche album, categoria o solo oggeto
+        if request.form["value"] == "multiple":
+            print("eliminazione multipla")
+
+            for i in carrello:
+                Gioielli.query.filter_by(codice=i).delete()
+        else:
+            gioiello = Gioielli.query.filter_by(codice=request.form["value"]).delete()
+
         frase = "eliminazione avvenuta con successo"
         back_to = "espositore"
         db.session.commit()

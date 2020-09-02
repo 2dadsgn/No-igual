@@ -5,6 +5,7 @@ body {
     font-size: 15px;
 }
 
+
 img {
     cursor: pointer;
 }
@@ -366,7 +367,8 @@ li {
         left: auto;
         right: auto;
         display: inline;
-
+        overflow: scroll;
+        height: 200%;
     }
 }
 
