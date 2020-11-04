@@ -97,18 +97,18 @@
                                     <div class="col-1 col-md-1 col-lg-1"></div>
                                     <div class="col-5 col-md-5 col-lg-5">
                                         {% if i.approvato == 0 %}
-                                            <button class="col-6 col-md-5 col-lg-5"
+                                            <button class="col-auto mr-auto "
                                                     onclick="http('/approva_utente','target','{{ i.email }}')"
                                                     id="cta-utenti" style="color: green">Abilita
                                             </button>
                                         {% else %}
-                                            <button id="cta-utenti" class="col-6 col-md-5 col-lg-5"
+                                            <button id="cta-utenti" class="col-auto "
                                                     onclick="http('/approva_utente','target','{{ i.email }}')"
                                                     id="cta-utenti" style="color: red">Disabilita
                                             </button>
                                         {% endif %}
-                                        <div class="col-auto col-md-auto col-lg-auto"></div>
-                                        <button id="cta-utenti" class="col-6 col-md-5 col-lg-5"
+
+                                        <button id="cta-utenti" class="col-auto mr-0 "
                                                 onclick="http('/rimuovi_utente','target','{{ i.email }}')"
                                                 id="cta-utenti" style="color: red">Rimuovi
                                         </button>

@@ -19,15 +19,9 @@
                     <div class="row">
                         <div class="col-4 col-md-4 col-lg-4"></div>
                         <div class="col-4 col-md-4 col-lg-4">
-                            <select class="dritto" name="ragione_sociale">
-                                {% if clienti %}
-                                    {% for d in clienti %}
-                                        <option value="{{ d["ragione_sociale"] }}">{{ d["ragione_sociale"] }}</option>
-                                    {% endfor %}
-                                {% else %}
-                                    <option value="empty"></option>
-                                {% endif %}
-                            </select>
+                            <input class="dritto" name="ragione_sociale">
+
+
                         </div>
                         <div class="col-4 col-md-4 col-lg-4"></div>
                     </div>
@@ -54,7 +48,7 @@
                         <div class="col-4 col-md-4 col-lg-4"></div>
                     </div>
 
-                    <h4 class=" dritto col-6">Data:</h4>
+                    <h4 class=" dritto col-6">Data prevista di consegna:</h4>
                     <input type="date" name="data" class="dritto ">
                 </div>
             </div>
@@ -84,16 +78,31 @@
 
         </div>
         <div class="row div-tasti">
-            <div class="col-4"></div>
-            <button class="col-6 col-md-2 col-lg-1 tasto-canc" id="indietro-ordine"
+            <div class="col-md-3 col-lg-4"></div>
+            <button class="col-4 col-md-6 col-lg-1 tasto-canc" id="indietro-ordine"
                     onclick="http('/routing','target','ordini')">
                 indietro
             </button>
-            <button class="col-6 col-md-2 col-lg-1 tasto-ins" type="submit"
+            <div class="col-md-3 d-lg-none d-sm-none"></div>
+
+            <div class="w-100 d-lg-none"></div>
+
+
+            <div class="col-md-3 d-lg-none d-sm-none"></div>
+
+            <button class="col-4 col-md-6 offset-md-3 col-lg-1 tasto-ins" type="submit"
                     onclick="http('/svuota_carrello','target','ordini')">svuota
             </button>
-            <button class="col-6 col-md-2 col-lg-1 tasto-ins" type="submit">crea</button>
-            <div class="col-4"></div>
+
+            <div class="col-md-3 d-lg-none d-sm-none"></div>
+
+            <div class="w-100 d-lg-none"></div>
+
+            <div class="col-md-3 d-lg-none d-sm-none"></div>
+
+            <button class="col-4 col-md-6 offset-md-3 col-lg-1 tasto-ins" type="submit">crea</button>
+            <div class="col-md-3 col-lg-4"></div>
+
         </div>
     </form>
     <!--FINE SEZIONE CREAZIONE ORDINE-->

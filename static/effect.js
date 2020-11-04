@@ -158,3 +158,8 @@ function http_cart(url, codice) {
 
 }
 
+
+/*var radio = document.getElementsByName(radio)
+for (i in radio){
+    i.
+}*/

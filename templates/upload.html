@@ -56,12 +56,12 @@
                         <img height="200px" width="100%" src="{{ url_for("static",filename=i) }}">
                         <input class="hidden" type="text" name="nome_file" value="{{ i }}">
 
-                        <h4 class="dritto">Codice id</h4>
-                        <input style="text-align: center;width: 100%;" class="dritto" type="text"
+                        <h4 class="dritto">Codice id </h4>
+                        <input style="text-align: center;width: 100%;" class="dritto" type="text" value="{{ i }}"
                                name="codice_id{{ i }}">
 
-                        <h4 class="dritto">Prezzo</h4>
-                        <input style="text-align: center" class="dritto" type="text" value=""
+                        <h4 class="dritto">Prezzo </h4>
+                        <input style="text-align: center" class="dritto" type="number" value="" step=".01"
                                name="prezzo{{ i }}">
                     </div>
 
