@@ -164,9 +164,10 @@ class Clienti(db.Model):
     iban = db.Column(db.String(30), nullable=False)
     ragione_sociale = db.Column(db.String(40), nullable=False, unique=True)
     ordini = db.relationship('Ordini', backref='ordinato_da', lazy=True)
+    author = db.Column(db.String(30), db.ForeignKey('utenti.email'), nullable=False)
 
     def __init__(self, nome, cognome, via, cap, citta, provincia, partita_iva, codice_fiscale, email, pec, codice_sdi,
-                 telefono, banca, iban, ragione_sociale):
+                 telefono, banca, iban, ragione_sociale, author):
         self.nome = nome
         self.cognome = cognome
         self.via = via
@@ -240,8 +241,10 @@ def routing():
             # lista di clienti
             customers = Clienti.query.all()
         else:
-    # lista di clienti
-    #customers = Clienti.query.filter_by()
+            # lista di clienti
+            # customers = Clienti.query.filter_by(author=session["username"])
+            print("nessun clienti restituito per rappresentante")
+
     except:
         print("-- error in fetchin clienti for routing ---")
 
@@ -616,7 +619,7 @@ def adding_customer():
                        request.form["codice_fiscale"], request.form["email"], request.form["email_pec"],
                        request.form["codice_sdi"],
                        request.form["telefono"], request.form["banca"], request.form["iban"],
-                       request.form["ragione_sociale"])
+                       request.form["ragione_sociale"], session["username"])
     db.session.add(customer)
     db.session.commit()
 
